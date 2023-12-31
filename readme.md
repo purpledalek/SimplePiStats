@@ -6,8 +6,22 @@ Simply run this command!
 Running this command after installation will also let you update it!
 
 # How to use
-Type the following into a web browser `<your pi's ip address>:5555`
+Type the following into a web browser `<your pi's ip address>:5555`.
+
+# How to read the stats
+## How to read the CPU state
+:] Means your Pi's CPU is happy!
+
+:| Means your Pi's CPU is under a bit of load.
+
+\>:] Angy.
+
+## How to read the temperature
+🔥 Means your Pi's temperature is around normal.
+
+🔥🔥 Means your Pi's temperature is a little bit warm.
+
+🔥🔥🔥 Means your Pi's temperature is above 60 degrees, and you should probably do something very quickly.
 
 # How to add services
-Add the names of the services you want to track the activity of to a text file called `services.txt`, with a new service on each line
-
+Add the names of the services you want to track the activity of to a text file called `services.txt`, with a new service on each line.
