@@ -1,0 +1,37 @@
+:root {
+    font-family: Verdana;
+    padding: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        color-scheme: light;
+    }
+}
+
+body {
+    display: flex;
+    justify-content: center;
+}
+
+.data {
+    background: rgba(0, 100, 0, 0.7);
+    width: 277.333px;
+    height: 300px;
+    margin: 20px;
+    padding: 10px;
+    border-radius: 25px;
+}
+
+@media only screen and (max-width: 767px) {
+    body {
+        display: grid !important;
+        margin: 10px 0;
+    }
+}

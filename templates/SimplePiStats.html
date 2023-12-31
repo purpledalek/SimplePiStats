@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Raspberry Pi Stats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <div class="data">
+        <h1>CPU status</h1>
+        <h2 id="cpu_status" style="width: 50px; transform: rotate(90deg) translate(20px, -25px) scaleY(1.5); scale: 5">{{ cpu_status }}</h2>
+    </div>
+    <div class="data">
+        <h1>Time since last reboot</h1>
+        <h2 id="boot_time"></h2>
+    </div>
+    <div class="data">
+        <h1>Temperature</h1>
+        <h2 id="temp" style="width: 28px; transform: translate(48px); scale: 2.5; padding-top: 28px;">{{ temp }}</h2>
+    </div>
+    <div class="data" id="services" style="height: auto; width: auto">
+        <h1>Services status</h1>
+        <p>{{ services|safe }}</p>
+    </div>
+
+    <script>
+        // Function to calculate and update the time since a given time string
+        function updateTimeSince(startTime) {
+            const currentTime = new Date();
+            const startTimeObject = new Date(startTime);
+            const timeDifference = currentTime - startTimeObject;
+
+            const seconds = Math.floor(timeDifference / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            const timeSince = {
+            days: days,
+            hours: hours % 24,
+            minutes: minutes % 60,
+            seconds: seconds % 60
+            };
+
+            // Display the time since in the HTML element
+            document.getElementById('boot_time').innerHTML = `
+            ${timeSince.days} days, ${timeSince.hours} hours, ${timeSince.minutes} minutes, ${timeSince.seconds} seconds
+            `;
+        }
+
+        // Set the initial time string
+        const startTime = "{{ boot_time }}";
+
+
+        // Call the function initially
+        updateTimeSince(startTime);
+
+        // Update the time every second
+        setInterval(function() {
+            updateTimeSince(startTime);
+        }, 1000);
+    </script>
+</body>
+</html>
