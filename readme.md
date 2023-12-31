@@ -6,7 +6,7 @@ Simply run this command!
 Running this command after installation will also let you update it!
 
 # How to use
-Type the following into a web browser `<your pi's ip address>:5555`.
+Type the following into a web browser `<your pi's local ip address>:5555`. If you need help finding your Pi's local IP address, simply ssh into the Pi, and type in `hostname -I`, your Pi's local IP address is everything before the space.
 
 # How to read the stats
 ## How to read the CPU state
