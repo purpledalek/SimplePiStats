@@ -36,6 +36,7 @@ def index():
 
     up_since = subprocess.Popen(["uptime", "--since"], stdout=subprocess.PIPE, text=True)
     last_boot = up_since.communicate()[0].strip().replace("\n", "")
+    # Broyden's method:
     boot_time = str(datetime.datetime.strptime(last_boot, "%Y-%m-%d %H:%M:%S"))
 
     services = []
