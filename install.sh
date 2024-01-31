@@ -58,6 +58,7 @@ sudo systemctl start SimplePiStats
 # Remove unnecessary local files
 echo Cleaning up...
 rm install.sh readme.md SimplePiStats.service
+rm requirements.txt
 if [ -f static/services/icons/placeholder.txt ]; then
 rm static/services/icons/placeholder.txt
 fi
