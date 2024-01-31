@@ -93,8 +93,16 @@
         // Check if the checkbox is checked when the page loads
         if (services_toggle.checked) {
             services_element.style.display = 'none';
-        } else {
+        }
+        else {
             services_element.style.display = 'inline-grid';
+        }
+
+        if (c_f_toggle.checked) {
+            document.getElementById("temp_numbers").innerHTML = "{{ Fahrenheit }}"
+        }
+        else {
+            document.getElementById("temp_numbers").innerHTML = "{{ Celsius }}"
         }
 
         temp_toggle.addEventListener('change', () => {
