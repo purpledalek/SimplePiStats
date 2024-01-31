@@ -1,0 +1,98 @@
+:root {
+    font-family: "Comic Sans MS", sans-serif;
+    padding: 10px;
+    color-scheme: dark;
+}
+
+.centered_div {
+    display: flex;
+    justify-content: center;
+}
+
+.data {
+    background: rgba(0, 100, 0, 0.7);
+    width: 15%;
+    margin: 20px;
+    padding: 10px;
+    border-radius: 25px;
+    text-align: left;
+    height: fit-content;
+}
+
+.heading {
+    text-align: center;
+}
+
+.numbers {
+    text-align: center;
+}
+
+.button {
+    padding: 5px;
+}
+
+#service_link {
+    margin-left: 35px;
+}
+
+#service_link > button {
+    cursor: pointer;
+}
+
+#settings_button {
+    height: 35px;
+    width: 80px;
+}
+
+#settings {
+    display: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    position: fixed;
+    overflow: hidden;
+    left: 0;
+}
+
+#settings_panel {
+    display: inline;
+    width: 350px;
+    background-color: darkgray !important;
+    color: black;
+    position: absolute;
+    top: 25%;
+    left: 35%;
+    border-radius: 25px;
+    padding: 50px;
+}
+
+.setting-block {
+    margin: 10px;
+}
+
+#ok_button {
+    width: 20%;
+    padding: 5px;
+    float: right;
+}
+
+.emoji {
+    display: block;
+    width: 100%;
+}
+
+@media only screen and (max-width: 767px) {
+    .centered_div {
+        display: block !important;
+    }
+    .data {
+        width: 90%;
+    }
+    #settings_panel {
+        left: 12%;
+    }
+    .emoji {
+        margin-top: -35px !important;
+    }
+}

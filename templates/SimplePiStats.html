@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Raspberry Pi Stats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+    <div class="centered_div">
+        <button id="settings_button" onclick="showSettings()">Settings</button>
+        <div class="data">
+            <h1 class="heading" style="margin-bottom: 0;">CPU status</h1>
+            <img class="emoji" src="static/CPU/{{ cpu_status }}.png" style="margin-top: 7px;">
+            <p class="numbers" id="cpu_status_numbers" style="margin-top: 31px">{{ cpu_status_numbers }}</p>
+        </div>
+        <div class="data">
+            <h1 class="heading" style="white-space: initial">Time since last reboot</h1>
+            <h2 style="white-space: initial" id="boot_time"></h2>
+        </div>
+        <div class="data">
+            <h1 class="heading">Temperature</h1>
+            <img class="emoji" src="static/fire/{{ temp }}.png">
+            <p class="numbers" id="temp_numbers">{{ Celsius }}</p>
+        </div>
+        <div class="data" id="services" style="height: auto; display:block;">
+            <h1 class="heading">Service statuses</h1>
+            {{ services|safe }}
+        </div>
+    </div>
+
+    <div id="settings">
+        <div id="settings_panel">
+            <div style="width: 100%">
+                <form action="/update_settings" method="POST">
+                    <div class="setting-block">
+                        <input type="checkbox" id="temp_toggle" class="toggle_switch" style="display: inline-block" name="numbers_toggle" {{ numbers_checkbox_state }}>
+                        <label for="temp_toggle" class="toggle_switch" style="padding-right: 10px;">Show CPU load and temperature numbers</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="services_toggle" class="toggle_switch" style="display: inline-block" name="services_toggle" {{ services_checkbox_state }}>
+                        <label for="services_toggle" class="toggle_switch" style="padding-right: 10px;">Hide services section</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="c_f_toggle" class="toggle_switch" onclick="Fahrenheit()" style="display: inline-block" name="c_f_toggle" {{ fahrenheit_checkbox_state }}>
+                        <label for="c_f_toggle" class="toggle_switch" style="padding-right: 10px;">Use Fahrenheit</label>
+                    </div>
+                    <button type="submit" id="ok_button" onclick="hideSettings()">Ok</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    function handle_button_action(buttonId) {
+        // Send button ID to the Flask server using AJAX
+        fetch('/button_action', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                button_id: buttonId,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(data.service).querySelector('#status').innerText = data.status;
+                document.getElementById(data.service).querySelector('#status').innerText = data.status;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        const temp_numbers_element = document.getElementById('temp_numbers');
+        const services_element = document.getElementById('services');
+        const cpu_status_numbers_element = document.getElementById('cpu_status_numbers');
+        const temp_toggle = document.getElementById('temp_toggle');
+        const services_toggle = document.getElementById('services_toggle');
+        const c_f_toggle = document.getElementById('c_f_toggle')
+
+        // Check if the checkbox is checked when the page loads
+        if (temp_toggle.checked) {
+            temp_numbers_element.style.display = 'block';
+            cpu_status_numbers_element.style.display = 'block';
+        } else {
+            temp_numbers_element.style.display = 'none';
+            cpu_status_numbers_element.style.display = 'none';
+        }
+
+        // Check if the checkbox is checked when the page loads
+        if (services_toggle.checked) {
+            services_element.style.display = 'none';
+        } else {
+            services_element.style.display = 'inline-grid';
+        }
+
+        temp_toggle.addEventListener('change', () => {
+            if (temp_toggle.checked) {
+                temp_numbers_element.style.display = 'block';
+                cpu_status_numbers_element.style.display = 'block';
+            }
+            else {
+                temp_numbers_element.style.display = 'none';
+                cpu_status_numbers_element.style.display = 'none';
+            }
+        });
+
+        services_toggle.addEventListener('change', () => {
+            if (services_toggle.checked) {
+                services_element.style.display = 'none';
+            }
+            else {
+                services_element.style.display = 'inline-grid';
+            }
+        });
+
+        // Function to calculate and update the time since a given time string
+        function updateTimeSince(startTime) {
+            const currentTime = new Date();
+            const startTimeObject = new Date(startTime);
+            const timeDifference = currentTime - startTimeObject;
+            const seconds = Math.floor(timeDifference / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            const timeSince = {
+                days: days,
+                hours: hours % 24,
+                minutes: minutes % 60,
+                seconds: seconds % 60
+            };
+
+            // Display the time since in the HTML element
+            document.getElementById('boot_time').innerHTML = `
+                ${timeSince.days} days, ${timeSince.hours} hours, ${timeSince.minutes} minutes, ${timeSince.seconds} seconds
+            `;
+        }
+
+        // Set the initial time string
+        const startTime = "{{ boot_time }}";
+
+        // Call the function initially
+        updateTimeSince(startTime);
+
+        // Update the time every second
+        setInterval(function() {
+            updateTimeSince(startTime);
+        }, 1000);
+    });
+
+    function showSettings() {
+        document.getElementById('settings').style.display = "inline"
+    }
+    function hideSettings() {
+        document.getElementById('settings').style.display = "none"
+    }
+
+    function Fahrenheit() {
+        if (document.getElementById("c_f_toggle").checked) {
+            document.getElementById("temp_numbers").innerHTML = "{{ Fahrenheit }}"
+        }
+        else {
+            document.getElementById("temp_numbers").innerHTML = "{{ Celsius }}"
+        }
+    }
+
+    function resizeFont () {
+        const Data = document.getElementsByClassName("data")
+        for (const Content of Data) {
+            Content.style.fontSize = Content.offsetWidth / 16 + "px"
+        }
+    }
+
+    resizeFont()
+
+    window.addEventListener("resize", resizeFont)
+</script>
+</body>
+</html>
