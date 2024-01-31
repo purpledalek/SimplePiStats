@@ -117,6 +117,16 @@
             }
         });
 
+        c_f_toggle.addEventListener('change', () => {
+            if (c_f_toggle.checked) {
+                document.getElementById("temp_numbers").innerHTML = "{{ Fahrenheit }}"
+            }
+            else {
+                document.getElementById("temp_numbers").innerHTML = "{{ Celsius }}"
+            }
+    });
+
+
         // Function to calculate and update the time since a given time string
         function updateTimeSince(startTime) {
             const currentTime = new Date();
