@@ -107,7 +107,7 @@ def index():
         if line.startswith("temp="):
             temp = float(line.lstrip("temp=").rstrip("'C"))
             Celsius = temp
-            Fahrenheit = temp * 9 / 5 + 32
+            Fahrenheit = round(temp * 9 / 5 + 32, 1)
     if Celsius <= 50:
         temp = "1"
     elif Celsius <= 70:
