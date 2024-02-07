@@ -7,8 +7,19 @@
     <title>Raspberry Pi Stats</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <script>
+        function change_link() {
+            link = document.getElementsByClassName("service_stats")
+            for (element of link) {
+                if (element.nodeName === "A") {
+                    port = ":" + element.id
+                    element.href = "http://" + window.location.hostname + port
+                }
+            }
+        }
+    </script>
 </head>
-<body>
+<body onload="change_link()">
     <div class="centered_div">
         <button id="settings_button" onclick="showSettings()">Settings</button>
         <div class="data">

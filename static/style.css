@@ -31,6 +31,10 @@
     padding: 5px;
 }
 
+.service {
+    margin-bottom: 20px;
+}
+
 #service_link {
     margin-left: 35px;
 }

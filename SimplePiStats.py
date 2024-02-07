@@ -11,22 +11,30 @@ port = 5555
 
 
 def service_check(service_):
+    output = ""
     if "/" in service_:
         service = service_.split("/")[0]
+        output += f"<div class=\"service\" id=\"{service}\"> <div class=\"text\">"
+        port = service_.split("/")[1]
+        desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
+        if "-" in desc:
+            output += f"<a class=\"service_stats\" id=\"{port}\">" + service.title() + "</a>"
+        else:
+            output += f"<a class=\"service_stats\" id=\"{port}\">" + desc + "</a>"
     else:
         service = service_
-    output = f"<div class=\"service\" id=\"{service}\"> <div class=\"text\">"
+        output += f"<div class=\"service\" id=\"{service}\"> <div class=\"text\">"
+        desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
+        if "-" in desc:
+            output += "<p class=\"service_stats\">" + service.title() + "</p>"
+        else:
+            output += "<p class=\"service_stats\">" + desc + "</p>"
     status_check = subprocess.run(["systemctl", "is-active", service], stdout=subprocess.PIPE, text=True).stdout.strip()
-    desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
     for file in os.listdir(r"static/services/icons"):
         if service.lower() == file.split(".")[0].lower():
             output += f"<img class=\"service_icon\" src=\"static/services/icons/{file}\">"
         else:
             pass
-    if "-" in desc:
-        output += "<p class=\"service_stats\">" + service.title() + "</p>"
-    else:
-        output += "<p class=\"service_stats\">" + desc + "</p>"
     if status_check == "active":
         output += "<p id=\"status\"> 🟢 </p>"
     else:
@@ -35,9 +43,6 @@ def service_check(service_):
     output += f"<button onclick=\"handle_button_action('start/{service}')\" class=\"button\"id=\"start\">Start</button>"
     output += f"<button onclick=\"handle_button_action('stop/{service}')\" class=\"button\"id=\"stop\">Stop</button>"
     output += f"<button onclick=\"handle_button_action('restart/{service}')\" class=\"button\" id=\"restart\">Restart</button>"
-    if "/" in service_:
-        port = service_.split("/")[1]
-        output += (f"<a id=\"{service_}\"><button class=\"button\" style=\"margin: 20px; float: right;\">Link to local {service_.split('/')[0].replace('_', ' ').title()} page</button></a>\n<script>document.getElementById(\"{service_}\").href = \"http://\" + window.location.hostname + \":{port}\"</script>")
     output += "</div></div>"
     return output
 
