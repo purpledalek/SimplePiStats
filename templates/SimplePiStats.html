@@ -58,6 +58,10 @@
                         <input type="checkbox" id="c_f_toggle" class="toggle_switch" onclick="Fahrenheit()" style="display: inline-block" name="c_f_toggle" {{ fahrenheit_checkbox_state }}>
                         <label for="c_f_toggle" class="toggle_switch" style="padding-right: 10px;">Use Fahrenheit</label>
                     </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="font_toggle" class="toggle_switch" style="display: inline-block" onclick="toggle_font()" name="font_toggle" {{ font_checkbox_state }}>
+                        <label for="font_toggle" class="toggle_switch" style="padding-right: 10px">Use Comic Sans</label>
+                    </div>
                     <button type="submit" id="ok_button" onclick="hideSettings()">Ok</button>
                 </form>
             </div>
@@ -90,9 +94,10 @@
         const cpu_status_numbers_element = document.getElementById('cpu_status_numbers');
         const temp_toggle = document.getElementById('temp_toggle');
         const services_toggle = document.getElementById('services_toggle');
-        const c_f_toggle = document.getElementById('c_f_toggle')
+        const c_f_toggle = document.getElementById('c_f_toggle');
+        const font_toggle = document.getElementById('font_toggle')
 
-        // Check if the checkbox is checked when the page loads
+        // Check if the checkboxes are checked when the page loads
         if (temp_toggle.checked) {
             temp_numbers_element.style.display = 'block';
             cpu_status_numbers_element.style.display = 'block';
@@ -101,7 +106,6 @@
             cpu_status_numbers_element.style.display = 'none';
         }
 
-        // Check if the checkbox is checked when the page loads
         if (services_toggle.checked) {
             services_element.style.display = 'none';
         }
@@ -114,6 +118,13 @@
         }
         else {
             document.getElementById("temp_numbers").innerHTML = "{{ Celsius }}"
+        }
+
+        if (font_toggle.checked) {
+            document.documentElement.style.fontFamily = "Comic Sans MS, sans serif"
+        }
+        else {
+            document.documentElement.style.fontFamily = "verdana, serif"
         }
 
         temp_toggle.addEventListener('change', () => {
@@ -143,7 +154,7 @@
             else {
                 document.getElementById("temp_numbers").innerHTML = "{{ Celsius }}"
             }
-    });
+        });
 
 
         // Function to calculate and update the time since a given time string
@@ -207,6 +218,15 @@
     resizeFont()
 
     window.addEventListener("resize", resizeFont)
+
+    function toggle_font() {
+        if (font_toggle.checked) {
+            document.documentElement.style.fontFamily = "Comic Sans MS, sans serif"
+        }
+        else {
+            document.documentElement.style.fontFamily = "Verdana, serif"
+        }
+    }
 </script>
 </body>
 </html>

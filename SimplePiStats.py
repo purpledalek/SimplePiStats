@@ -53,7 +53,7 @@ if not os.path.exists(r"./static/services/service_names.txt"):
 
 if not os.path.exists(r"./static/checkbox_states.txt"):
     with open(r"./static/checkbox_states.txt", 'w') as file:
-        file.write("unchecked\nunchecked\nunchecked")
+        file.write("unchecked\nunchecked\nunchecked\nunchecked")
         file.close()
 
 
@@ -120,7 +120,7 @@ def index():
     else:
         temp = "3"
 
-    return render_template("SimplePiStats.html", cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" <br> ".join(services), numbers_checkbox_state=file_contents[0], services_checkbox_state=file_contents[1])
+    return render_template("SimplePiStats.html", cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" <br> ".join(services), numbers_checkbox_state=file_contents[0], services_checkbox_state=file_contents[1], font_checkbox_state=file_contents[2])
 
 
 @app.route('/button_action', methods=['POST'])
@@ -152,8 +152,12 @@ def update_settings():
         c_f_toggle = "checked"
     else:
         c_f_toggle = "unchecked"
+    if request.form.get("font_toggle"):
+        font_togggle = "checked"
+    else:
+        font_togggle = "unchecked"
     file = open(r"./static/checkbox_states.txt", 'w')
-    file.write(numbers_state + "\n" + services_state + "\n" + c_f_toggle)
+    file.write(numbers_state + "\n" + services_state + "\n" + c_f_toggle + "\n" + font_togggle)
     file.close()
     return '', 204
 
