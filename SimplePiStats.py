@@ -42,7 +42,7 @@ def service_check(service_):
     output += "</div> <div class=\"buttons\">"
     output += f"<button onclick=\"handle_button_action('start/{service}')\" class=\"button\"id=\"start\">Start</button>"
     output += f"<button onclick=\"handle_button_action('stop/{service}')\" class=\"button\"id=\"stop\">Stop</button>"
-    output += f"<button onclick=\"handle_button_action('restart/{service}')\" class=\"button\" id=\"restart\">Restart</button>"
+    output += f"<button onclick=\"restart_confirm('{service}'); handle_button_action('restart/{service}')\"class=\"button\" id=\"restart\">Restart</button>"
     output += "</div></div>"
     return output
 
@@ -153,18 +153,19 @@ def update_settings():
     else:
         c_f_toggle = "unchecked"
     if request.form.get("font_toggle"):
-        font_togggle = "checked"
+        font_toggle = "checked"
     else:
-        font_togggle = "unchecked"
+        font_toggle = "unchecked"
     file = open(r"./static/checkbox_states.txt", 'w')
-    file.write(numbers_state + "\n" + services_state + "\n" + c_f_toggle + "\n" + font_togggle)
+    file.write(numbers_state + "\n" + services_state + "\n" + c_f_toggle + "\n" + font_toggle)
     file.close()
     return '', 204
+
 
 ip_addresses = subprocess.check_output(['hostname', '-I']).decode().strip().split(" ")
 del ip_addresses[-1]
 print(f"SimplePiStats is currently running on http://{ip_addresses.pop(0)}:{port}")
-if len(ip_addresses) >= 1 :
+if len(ip_addresses) >= 1:
     for item in ip_addresses:
         ip_addresses.insert(ip_addresses.index(item)+1, f"http://{item}:{port}")
         ip_addresses.remove(item)

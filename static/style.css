@@ -35,12 +35,8 @@
     margin-bottom: 20px;
 }
 
-#service_link {
-    margin-left: 35px;
-}
-
-#service_link > button {
-    cursor: pointer;
+a a:visited{
+    color: white;
 }
 
 #settings_button {

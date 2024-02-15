@@ -60,7 +60,7 @@
                     </div>
                     <div class="setting-block">
                         <input type="checkbox" id="font_toggle" class="toggle_switch" style="display: inline-block" onclick="toggle_font()" name="font_toggle" {{ font_checkbox_state }}>
-                        <label for="font_toggle" class="toggle_switch" style="padding-right: 10px">Use Comic Sans</label>
+                        <label for="font_toggle" class="toggle_switch" style="padding-right: 10px">Use Comic Sans (this will have no effect if Comic Sans is not installed)</label>
                     </div>
                     <button type="submit" id="ok_button" onclick="hideSettings()">Ok</button>
                 </form>
@@ -84,9 +84,7 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById(data.service).querySelector('#status').innerText = data.status;
-                document.getElementById(data.service).querySelector('#status').innerText = data.status;
             })
-            .catch(error => console.error('Error:', error));
     }
     document.addEventListener("DOMContentLoaded", function() {
         const temp_numbers_element = document.getElementById('temp_numbers');
@@ -121,7 +119,7 @@
         }
 
         if (font_toggle.checked) {
-            document.documentElement.style.fontFamily = "Comic Sans MS, sans serif"
+            document.documentElement.style.fontFamily = "Comic Sans MS, verdana, serif"
         }
         else {
             document.documentElement.style.fontFamily = "verdana, serif"
@@ -226,6 +224,9 @@
         else {
             document.documentElement.style.fontFamily = "Verdana, serif"
         }
+    }
+    function restart_confirm(service) {
+        document.getElementById(service).children[0].children[1].innerHTML = " 🟠 "
     }
 </script>
 </body>
