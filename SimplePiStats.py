@@ -18,9 +18,9 @@ def service_check(service_):
         port = service_.split("/")[1]
         desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
         if "-" in desc:
-            output += f"<a class=\"service_stats\" id=\"{port}\">" + service.title() + "</a>"
+            output += f"<a class=\"service_stats\" id=\"{port}\" target=\"_blank\">{service.title()}</a>"
         else:
-            output += f"<a class=\"service_stats\" id=\"{port}\">" + desc + "</a>"
+            output += f"<a class=\"service_stats\" id=\"{port}\" target=\"_blank\">{desc}</a>"
     else:
         service = service_
         output += f"<div class=\"service\" id=\"{service}\"> <div class=\"text\">"
