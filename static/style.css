@@ -41,6 +41,12 @@
     margin-bottom: 20px;
 }
 
+.service_icon {
+    width: 30px;
+    float: left;
+    margin-right: 20px;
+}
+
 a {
     color: currentColor;
 }
