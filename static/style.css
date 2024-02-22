@@ -26,12 +26,17 @@
     text-align: center;
 }
 
-.button {
+.buttons {
+    margin-bottom: 20px;
     padding: 5px;
 }
 
 .service {
     margin-bottom: 20px;
+}
+
+#services {
+    width: fit-content;
 }
 
 #services p {
