@@ -3,13 +3,6 @@
     padding: 10px;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* Dark mode variables go here */
-        color-scheme: dark;
-    }
-}
-
 .centered_div {
     display: flex;
     justify-content: center;
@@ -92,6 +85,12 @@ a {
 .emoji {
     display: block;
     width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+    }
 }
 
 @media only screen and (max-width: 767px) {
