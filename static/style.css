@@ -34,6 +34,11 @@
     margin-bottom: 20px;
 }
 
+#services p {
+        margin: 0;
+        display: inline;
+}
+
 .service_icon {
     height: 30px;
     float: left;
