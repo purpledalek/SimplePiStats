@@ -57,6 +57,10 @@ a {
     color: currentColor;
 }
 
+*:not(a) {
+    cursor: default;
+}
+
 #settings_button {
     height: 35px;
     width: 80px;
