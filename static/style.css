@@ -117,6 +117,9 @@ a {
     .data {
         width: 90%;
     }
+    #services {
+        width: 90%;
+    }
     #settings_panel {
         left: 12%;
     }
