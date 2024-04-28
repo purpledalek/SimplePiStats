@@ -1,0 +1,256 @@
+:root {
+    font-family: verdana, roboto;
+    padding: 10px;
+    color: white;
+}
+
+.centered_div {
+    display: flex;
+    justify-content: center;
+}
+
+.data {
+    width: 25%;
+    margin: 20px;
+    padding: 10px;
+    border-radius: 25px;
+    text-align: center;
+    height: fit-content;
+    display: block;
+    h1 {
+        font-size: 2vw;
+        margin-top: 20px;
+    }
+}
+
+.heading {
+    text-align: center;
+}
+
+.innerContainer {
+    background-color: rgba(1, 1, 1, 0.3);
+    margin: 10px;
+    padding: 10px;
+    border-radius: 25px;
+}
+
+#rebootClock {
+    width: fit-content;
+    padding: 20px;
+    text-align: center;
+}
+
+#driveGrid {
+    display: flex;
+}
+
+.bootTime {
+    display: flex;
+}
+
+.rebootTimeNum {
+    margin: 0;
+    width: 70px;
+    text-align: center;
+    font-size: 1.4vw;
+}
+
+.rebootTimeWord {
+    margin-top: 10px;
+    width: 70px;
+    text-align: center;
+}
+
+.numbers {
+    text-align: center;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px;
+    margin-right: 15px;
+}
+
+.service {
+    margin-bottom: 50px;
+}
+
+#services {
+    min-width: 464.8px;
+}
+
+#services p {
+        margin: 0;
+        display: inline;
+}
+
+.group_title_icon {
+    height: 30px;
+    margin-right: 20px;
+}
+
+.service_icon {
+    height: 30px;
+    float: left;
+    margin-right: 20px;
+}
+
+a {
+    color: currentColor;
+}
+
+*:not(a) {
+    cursor: default;
+}
+
+#settings_button {
+    height: 35px;
+    width: 80px;
+}
+
+#settings {
+    display: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    position: fixed;
+    overflow: hidden;
+    left: 0;
+}
+
+#settings_panel {
+    display: inline;
+    width: 350px;
+    background-color: rgb(66, 71, 74);
+    position: absolute;
+    top: 25%;
+    left: 35%;
+    border-radius: 25px;
+    padding: 50px;
+    color: white
+}
+
+#edit_config {
+    display: none;
+}
+
+#extDisks {
+    width: fit-content;
+}
+
+.driveDiv {
+    width: fit-content;
+    height: fit-content;
+}
+
+.driveHeading {
+    text-align: center;
+}
+
+.driveTitle {
+    margin-bottom: 10px;
+}
+
+.driveData {
+    margin-bottom: 50px;
+}
+
+.setting-block {
+    margin: 10px;
+}
+
+#close_button {
+    float: right;
+}
+
+.emoji {
+    display: block;
+    width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+    }
+}
+
+#serverTimeBlock {
+    display: inline-block;
+    width: fit-content;
+    vertical-align: top;
+}
+
+#serverTimeDiv {
+    display: inline
+}
+
+#speedTest {
+    display: inline-block;
+}
+
+.speedTestData{
+    display: inline-block;
+
+}
+
+#ping, #upload, #download {
+    width: 150px;
+    text-align: center;
+}
+
+.speedTestTitle {
+    display: block !important;
+    text-align: center;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .centered_div {
+        display: block;
+    }
+    .data {
+        width: 85%;
+        h1 {
+            font-size: 5vw;
+        }
+    }
+    #rebootClock {
+        width: inherit !important;
+        padding: 20px;
+    }
+    #services {
+        width: 85%;
+        min-width: initial;
+    }
+    #settings_panel {
+        width: 50%;
+        left: 14%;
+    }
+    #extDisks {
+        width: inherit;
+    }
+    .emoji {
+        margin-top: -35px;
+    }
+    .bootTime {
+        .rebootTimeNum {
+            font-size: 8vw;
+        }
+        .rebootTimeWord {
+            font-size: 6vw;
+        }
+    }
+    #driveGrid {
+        display: block;
+    }
+    .driveDiv {
+        width: 87%;
+    }
+    .speedTestData {
+        display: flex;
+    }
+}

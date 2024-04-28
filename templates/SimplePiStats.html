@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>SimplePiStats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <script>
+        function change_link() {
+            link = document.getElementsByClassName("service_stats")
+            for (element of link) {
+                if (element.nodeName === "A") {
+                    port = ":" + element.id
+                    element.href = "http://" + window.location.hostname + port
+                }
+            }
+        }
+    </script>
+</head>
+<body onload="change_link()">
+    <h2 style="margin-right: 20px;">SimplePiStats</h2>
+    <div id="buttonContainer">
+        <button class="systemButton" onclick="showSettings()">Settings</button>
+        <button class="systemButton" id="restartSystem" onclick="restartSystem()" style="float: right; margin-right: 0;">Restart system</button>
+    </div>
+    <div id="serverTimeBlock">
+        <p style="width: fit-content; display: inline-block;">Server time: </p>
+        <div id="serverTimeDiv"></div>
+    </div>
+    <div id="speedTest">
+        <div class="speedTestData">
+            <p class="speedTestTitle"><b>Download</b></p>
+            <p id="download" class="innerContainer">
+                Please wait...
+            </p>
+        </div>
+        <div class="speedTestData">
+            <p class="speedTestTitle"><b>Upload</b></p>
+            <p id="upload" class="innerContainer">
+                Please wait...
+            </p>
+        </div>
+        <div class="speedTestData">
+            <p class="speedTestTitle"><b>Ping</b></p>
+            <p id="ping" class="innerContainer">
+                Please wait...
+            </p>
+        </div>
+    </div>
+    <div class="centered_div">
+        <div class="data" id="rebootClock">
+            <h2 class="heading" style="white-space: initial">Last system restart</h2>
+            <div id="bootTime" class="innerContainer">
+                <div class="bootTime" id="bootTimeNum">
+                    <p class="rebootTimeNum" id="daysNum" style="flex-grow: 1; text-align: left; margin-left: 16px;"></p>
+                    <p class="rebootTimeNum" id="hoursNum"></p>
+                    <p class="rebootTimeNum" style="width: 15px;">:</p>
+                    <p class="rebootTimeNum" id="minutesNum"></p>
+                    <p class="rebootTimeNum" style="width: 15px;">:</p>
+                    <p class="rebootTimeNum" id="secondsNum"></p>
+                </div>
+                <div class="bootTime" id="bootTimeWord">
+                    <p class="rebootTimeWord" id="daysWord" style="flex-grow: 1; text-align: left; margin-left: 10px;"></p>
+                    <p class="rebootTimeWord" id="hoursWord"></p>
+                    <p class="rebootTimeWord" style="width: 15px;"></p>
+                    <p class="rebootTimeWord" id="minutesWord"></p>
+                    <p class="rebootTimeWord" style="width: 15px;"></p>
+                    <p class="rebootTimeWord" id="secondsWord"></p>
+                </div>
+            </div>
+            <h2>ago</h2>
+        </div>
+        <div class="data">
+            <h2 class="heading" style="margin-bottom: 0;">CPU status</h2>
+            <img class="emoji" src="static/CPU/{{ cpu_status }}.png">
+            <p class="numbers" id="cpu_status_numbers" style="margin-top: 31px">{{ cpu_status_numbers }}</p>
+        </div>
+        <div class="data">
+            <h2 class="heading">Temperature</h2>
+            <img class="emoji" src="static/fire/{{ temp }}.png">
+            <p class="numbers" id="temp_numbers">{{ Celsius }}</p>
+        </div>
+    </div>
+    <div class="centered_div" style="flex-direction: row-reverse;">
+        <div class="data" id="runCommand" style="text-align: left;">
+            <h2 class="heading" id="runCommandHeading">Run a command</h2>
+            {{ command_buttons|safe }}
+            <div class="innerContainer" id="commandReturn" style="font-size: 20px; margin-bottom: 10px; min-height: 30px; overflow: hidden;">> Command output</div>
+        </div>
+        <div class="data" id="services" style="height: fit-content; text-align: left;">
+            <h2 class="heading">Service statuses</h2>
+            {{ services|safe }}
+        </div>
+        <div class="data" id="extDisks">
+            <h2 class="heading" id="extDisksHeading">Drives</h2>
+            <div id="driveGrid">
+                {{ ext_drives|safe }}
+            </div>
+        </div>
+    </div>
+
+    <div id="settings">
+        <div id="settings_panel">
+            <div style="width: 100%">
+                <form action="/update_settings" method="POST">
+                    <div class="setting-block">
+                        <input type="checkbox" id="temp_toggle" class="toggle_switch" style="display: inline-block" name="numbers_toggle" {{ numbers_checkbox_state }}>
+                        <label for="temp_toggle" class="toggle_switch" style="padding-right: 10px;">Show CPU load and temperature numbers</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="services_toggle" class="toggle_switch" style="display: inline-block" name="services_toggle" {{ services_checkbox_state }}>
+                        <label for="services_toggle" class="toggle_switch" style="padding-right: 10px;">Hide services section</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="commandsToggle" class="toggle_switch" style="display: inline-block" name="commandsToggle" {{ commands_checkbox_state }}>
+                        <label for="commands_toggle" class="toggle_switch" style="padding-right: 10px">Hide commands section</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="diskToggle" class="toggle_switch" style="display: inline-block" name="diskToggle" {{ disk_checkbox_state }}>
+                        <label for="disk_toggle" class="toggle_switch" style="padding-right: 10px">Hide drives section</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="c_f_toggle" class="toggle_switch" onclick="Fahrenheit()" style="display: inline-block" name="c_f_toggle" {{ fahrenheit_checkbox_state }}>
+                        <label for="c_f_toggle" class="toggle_switch" style="padding-right: 10px;">Use Fahrenheit</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="font_toggle" class="toggle_switch" style="display: inline-block" onclick="toggle_font()" name="font_toggle" {{ font_checkbox_state }}>
+                        <label for="font_toggle" class="toggle_switch" style="padding-right: 10px">Use Comic Sans (this will have no effect if Comic Sans is not installed)</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="serverTimeToggle" class="toggle_switch" style="display: inline-block" name="serverTimeToggle" {{ time_checkbox_state }}>
+                        <label for="serverTimeToggle" class="toggle_switch" style="padding-right: 10px">Hide server time</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="mysteryToggle" class="toggle_switch" style="display: inline-block" name="mysteryToggle" {{ mystery_checkbox_state }}>
+                        <label for="mysteryToggle" class="toggle_switch" style="padding-right: 10px">?????</label>
+                    </div>
+                    <div class="setting-block">
+                        <label for="divBgColor">Set background color</label>
+                        <input type="color" id="divBgColor" value="{{ div_color }}">
+                    </div>
+                    <div class="setting-block">
+                        <button onclick="ShowEditConfigBox()">Edit config...</button>
+                    </div>
+                    <button type="submit" id="close_button" onclick="hideSettings()" style="margin-right: 0;">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <form id="edit_config" style="display: none; top: 25%; left: 5%; width: 90%; position: absolute;" onsubmit="updateConfig(this)">
+        <textarea style="height: 800px; width: 100%;">{{ config_file }}</textarea>
+        <button type="submit">Save (May require restarting SimplePiStats for changes to take effect)</button>
+    </form>
+
+<script>
+    fetch('/speed_test', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("speedTest").querySelector('#ping').innerText = data.ping;
+        document.getElementById("speedTest").querySelector('#upload').innerText = data.upload;
+        document.getElementById("speedTest").querySelector('#download').innerText = data.download;
+    })
+
+    function handle_button_action(buttonId) {
+        fetch('/button_action', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                button_id: buttonId,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById(data.service).querySelector('#status').innerText = data.status;
+        })
+    }
+
+    function runCommand(commandText) {
+        fetch('/run_command', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                command_text: commandText,
+            }),
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("commandReturn").innerText = "> Command output\n\n" + data.substr(0, 1000);
+        })
+    }
+
+    function restartSystem() {
+        conf = confirm("Are you sure you want to restart the system?")
+        if (conf === true) {
+            fetch('/restart_system', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                for (button of document.getElementsByTagName("button"))  {
+                    button.disabled = true
+                }
+                clearInterval(timeInterval)
+                time = ["daysNum", "hoursNum", "minutesNum", "secondsNum"]
+                for (number of time) {
+                    document.getElementById(number).innerText = "--"
+                }
+                for (item of document.getElementsByClassName("emoji")) {
+                    item.src = "static/reboot.png"
+                    item.style = "height: 145.967px"
+                }
+                for (item of document.getElementsByClassName("numbers")) {
+                    item.innerText = "--.-"
+                }
+                restartBackground = document.createElement("span")
+                restartBackground.style = "background-color: rgba(0, 0, 0, 0.5); width: 100%; position: absolute; left: 0px; height: 100%; top: 0;"
+                restartBanner = document.createElement("span")
+                restartBanner.style = "background-color: black; color: white; width: 100%; display: block; padding-bottom: 10px; top: 50%; position: absolute; text-align: center; font-size: 75px; left: 0;"
+                restartBanner.innerText = data.status
+                document.body.appendChild(restartBackground)
+                document.body.appendChild(restartBanner)
+            })
+        }
+    }
+
+    // Yes, this is out here for a reason, DON'T move it, you WILL break things!!
+    const dataBackroundColor = document.getElementById("divBgColor");
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        const temp_numbers_element = document.getElementById('temp_numbers');
+        const services_element = document.getElementById('services');
+        const cpu_status_numbers_element = document.getElementById('cpu_status_numbers');
+        const commands_element = document.getElementById("runCommand");
+        const mystery_element = document.getElementById("runCommandHeading");
+        const disk_element = document.getElementById("extDisks");
+        const server_time_element = document.getElementById("serverTimeBlock");
+        const temp_toggle = document.getElementById('temp_toggle');
+        const services_toggle = document.getElementById('services_toggle');
+        const c_f_toggle = document.getElementById('c_f_toggle');
+        const font_toggle = document.getElementById('font_toggle');
+        const commands_toggle = document.getElementById("commandsToggle");
+        const mystery_toggle = document.getElementById("mysteryToggle");
+        const disk_toggle = document.getElementById("diskToggle");
+        const server_time_toggle = document.getElementById("serverTimeToggle");
+
+        // Check if the checkboxes are checked when the page loads
+        if (temp_toggle.checked) {
+            temp_numbers_element.style.display = 'block';
+            cpu_status_numbers_element.style.display = 'block';
+        } else {
+            temp_numbers_element.style.display = 'none';
+            cpu_status_numbers_element.style.display = 'none';
+        }
+
+        if (services_toggle.checked) {
+            services_element.style.display = 'none';
+        }
+        else {
+            services_element.style.display = 'block';
+        }
+
+        if (disk_toggle.checked) {
+            disk_element.style.display = 'none';
+        }
+        else {
+            disk_element.style.display = 'block';
+        }
+
+        if (c_f_toggle.checked) {
+            document.getElementById("temp_numbers").innerHTML = "{{ Fahrenheit }}"
+        }
+        else {
+            document.getElementById("temp_numbers").innerHTML = "{{ Celsius }}"
+        }
+
+        if (font_toggle.checked) {
+            document.documentElement.style.fontFamily = "Comic Sans MS, verdana, Roboto"
+        }
+        else {
+            document.documentElement.style.fontFamily = "verdana, Roboto"
+        }
+
+        if (commands_toggle.checked) {
+            commands_element.style.display = 'none';
+        }
+        else {
+            commands_element.style.display = 'block';
+        }
+
+        if (server_time_toggle.checked) {
+            server_time_element.style.display = 'none';
+        }
+        else {
+            server_time_element.style.display = 'inline-block';
+        }
+
+        if (mystery_toggle.checked) {
+            mystery_element.innerText = "Run a fucking command! NOW!"
+        }
+        else {
+            mystery_element.innerText = "Run a command"
+        }
+
+        temp_toggle.addEventListener('change', () => {
+            if (temp_toggle.checked) {
+                temp_numbers_element.style.display = 'block';
+                cpu_status_numbers_element.style.display = 'block';
+            }
+            else {
+                temp_numbers_element.style.display = 'none';
+                cpu_status_numbers_element.style.display = 'none';
+            }
+        });
+
+        services_toggle.addEventListener('change', () => {
+            if (services_toggle.checked) {
+                services_element.style.display = 'none';
+            }
+            else {
+                services_element.style.display = 'block';
+            }
+        });
+        
+        commands_toggle.addEventListener('change', () => {
+            if (commands_toggle.checked) {
+                commands_element.style.display = "none"
+            }
+            else {
+                commands_element.style.display = "block"
+            }
+        });
+
+        server_time_toggle.addEventListener('change', () => {
+            if (server_time_toggle.checked) {
+                server_time_element.style.display = "none"
+            }
+            else {
+                server_time_element.style.display = "inline-block"
+            }
+        });
+
+        disk_toggle.addEventListener('change', () => {
+            if (disk_toggle.checked) {
+                disk_element.style.display = "none"
+            }
+            else {
+                disk_element.style.display = "block"
+            }
+        });
+
+        c_f_toggle.addEventListener('change', () => {
+            if (c_f_toggle.checked) {
+                document.getElementById("temp_numbers").innerHTML = "{{ Fahrenheit }}"
+            }
+            else {
+                document.getElementById("temp_numbers").innerHTML = "{{ Celsius }}"
+            }
+        });
+
+
+        mystery_toggle.addEventListener('change', () => {
+            if (mystery_toggle.checked) {
+                mystery_element.innerText = "Run a fucking command! NOW!"
+            }
+            else {
+                mystery_element.innerText = "Run a command"
+            }
+        });
+
+        function setDataBackground() {
+            for (div of document.getElementsByClassName("data")) {
+                div.style.backgroundColor = dataBackroundColor.value
+            }
+        }
+
+        dataBackroundColor.addEventListener('change', () => {
+            fetch('/save_color', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    data_div_color: dataBackroundColor.value,
+                }),
+            })
+        });
+
+        setDataBackground()
+
+        function pluraliser(number, word) {
+            if (number !== 1) {
+                pluralWord = word + "s"
+            }
+            else {
+                pluralWord = word
+            }
+            if (number < 10 && word != "day"){
+                number = "0" + number
+            }
+            return {
+                "number": number,
+                "word": pluralWord,
+            }
+        }
+
+        const serverTime = "{{ server_time }}"
+        document.getElementById("serverTimeDiv").innerText = new Date(serverTime)
+        // Function to calculate and update the time since a given time string
+        function updateTimeSince(bootTime) {
+            const currentTime = new Date()
+            const startTimeObject = new Date(bootTime);
+            const startTimeUTC = Date.UTC(startTimeObject.getUTCFullYear(), startTimeObject.getUTCMonth(), startTimeObject.getUTCDate(), startTimeObject.getUTCHours(), startTimeObject.getUTCMinutes(), startTimeObject.getUTCSeconds())
+            const nowUTC = Date.UTC(currentTime.getUTCFullYear(), currentTime.getUTCMonth(), currentTime.getUTCDate(), currentTime.getUTCHours(), currentTime.getUTCMinutes(), currentTime.getUTCSeconds())
+            const timeDifference = nowUTC - startTimeUTC;
+            const seconds = Math.floor(timeDifference / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            const timeSince = {
+                days: pluraliser(days, "day"),
+                hours: pluraliser(hours % 24, "hour"),
+                minutes: pluraliser(minutes % 60, "min"),
+                seconds: pluraliser(seconds % 60, "sec")
+            };
+
+            // Display the time since in the HTML element
+            document.getElementById('daysNum').innerHTML = `${timeSince.days.number}`;
+            document.getElementById('hoursNum').innerHTML = `${timeSince.hours.number}`;
+            document.getElementById('minutesNum').innerHTML = `${timeSince.minutes.number}`;
+            document.getElementById('secondsNum').innerHTML = `${timeSince.seconds.number}`;
+            document.getElementById('daysWord').innerHTML = `${timeSince.days.word}`;
+            document.getElementById('hoursWord').innerHTML = `${timeSince.hours.word}`;
+            document.getElementById('minutesWord').innerHTML = `${timeSince.minutes.word}`;
+            document.getElementById('secondsWord').innerHTML = `${timeSince.seconds.word}`;
+        }
+
+
+        // Set the initial time string
+        const bootTime = "{{ boot_time }}";
+
+        // Call the function initially
+        updateTimeSince(bootTime);
+
+        // Update the time every second
+        timeInterval = setInterval(function() {
+            updateTimeSince(bootTime);
+        }, 1000);
+    });
+
+    function showSettings() {
+        document.getElementById('settings').style.display = "inline"
+    }
+
+    function ShowEditConfigBox() {
+        document.getElementById('settings').style.display = "none"
+        document.getElementById("edit_config").style.display = "block"
+    }
+
+    function updateConfig(form) {
+        event.preventDefault()
+        fetch('/edit_config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                config_data: form.children[0].value
+            }),
+        })
+        document.getElementById("edit_config").style.display = "none"
+    }
+
+    function hideSettings() {
+        document.getElementById('settings').style.display = "none"
+    }
+
+    function Fahrenheit() {
+        if (document.getElementById("c_f_toggle").checked) {
+            document.getElementById("temp_numbers").innerHTML = "{{ Fahrenheit }}"
+        }
+        else {
+            document.getElementById("temp_numbers").innerHTML = "{{ Celsius }}"
+        }
+    }
+
+    function toggle_font() {
+        if (font_toggle.checked) {
+            document.documentElement.style.fontFamily = "Comic Sans MS, sans serif"
+        }
+        else {
+            document.documentElement.style.fontFamily = "Verdana, Roboto"
+        }
+    }
+
+    function restart_confirm(service) {
+        document.getElementById(service).children[0].querySelector("#status").innerHTML = " 🟠 ";
+    }
+</script>
+</body>
+</html>
