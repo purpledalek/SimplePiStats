@@ -188,25 +188,6 @@ a {
     display: inline
 }
 
-#speedTest {
-    display: inline-block;
-}
-
-.speedTestData{
-    display: inline-block;
-
-}
-
-#ping, #upload, #download {
-    width: 150px;
-    text-align: center;
-}
-
-.speedTestTitle {
-    display: block !important;
-    text-align: center;
-}
-
 
 @media only screen and (max-width: 767px) {
     .centered_div {
@@ -249,8 +230,5 @@ a {
     }
     .driveDiv {
         width: 87%;
-    }
-    .speedTestData {
-        display: flex;
     }
 }
