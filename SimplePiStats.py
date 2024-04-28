@@ -95,7 +95,7 @@ def speed_test():
 
 if not os.path.exists(r"./config.ini"):
     config["SimplePiStats"] = {
-        "bg_color": "#084e0a",
+        "bg_color": "\"#084e0a\"",
         "commands": [],
         "drives": [],
         "services": []
