@@ -67,7 +67,7 @@ def service_check(service_):
         output += "<p id=\"status\"> 🔴 </p>"
     output += "</div>"
     service_boot_time = subprocess.run(["systemctl", "show", "--property=ActiveEnterTimestamp", service], stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")
-    output += f"Last service restart {humanize.naturaltime(datetime.datetime.now().replace(tzinfo=pytz.utc, microsecond=0) - dateparser.parse(service_boot_time).replace(tzinfo=pytz.utc, microsecond=0), minimum_unit='seconds')}"
+    output += f"Service last restarted {humanize.naturaltime(datetime.datetime.now().replace(tzinfo=pytz.utc, microsecond=0) - dateparser.parse(service_boot_time).replace(tzinfo=pytz.utc, microsecond=0), minimum_unit='seconds')}"
     if stop == True or restart == True:
         output += f"<div class=\"buttons\">"
         if stop == True:
@@ -104,7 +104,7 @@ if not os.path.exists(r"./config.ini"):
 
 if not os.path.exists(r".checkbox_states.txt"):
     with open(r".checkbox_states.txt", 'w') as file:
-        file.write("unchecked\n" * 8)
+        file.write("unchecked\n" * 9)
         file.close()
 
 def create_command_buttons():
@@ -217,7 +217,7 @@ def index():
                     ext_drives.append(f"<p class=\"driveData\">{used}B used</p>")
             ext_drives.append("</div>")
             count = count + 1
-    return render_template("SimplePiStats.html", cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), numbers_checkbox_state=file_contents[0], services_checkbox_state=file_contents[1], fahrenheit_checkbox_state=file_contents[2], commands_checkbox_state=file_contents[3], disk_checkbox_state=file_contents[4], font_checkbox_state=file_contents[5], mystery_checkbox_state=file_contents[6], time_checkbox_state=file_contents[7], command_buttons=" ".join(command_buttons), ext_drives=" ".join(ext_drives), server_time=server_time, div_color=conf_get("bg_color"), config_file=open(r"config.ini", "r").read())
+    return render_template("SimplePiStats.html", cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), numbers_checkbox_state=file_contents[0], services_checkbox_state=file_contents[1], fahrenheit_checkbox_state=file_contents[2], commands_checkbox_state=file_contents[3], disk_checkbox_state=file_contents[4], font_checkbox_state=file_contents[5], mystery_checkbox_state=file_contents[6], time_checkbox_state=file_contents[7], speed_checkbox_state=file_contents[8], command_buttons=" ".join(command_buttons), ext_drives=" ".join(ext_drives), server_time=server_time, div_color=conf_get("bg_color"), config_file=open(r"config.ini", "r").read())
 
 @app.route('/save_color', methods=['POST'])
 def save_color():
@@ -285,13 +285,18 @@ def update_settings():
     else:
         mystery_toggle = "unchecked"
 
-    if request.form.get("time_toggle"):
-        time_toggle = "checked"
+    if request.form.get("server_time_toggle"):
+        server_time_toggle = "checked"
     else:
-        time_toggle = "unchecked"
+        server_time_toggle = "unchecked"
+
+    if request.form.get("speed_test_toggle"):
+        speed_test_toggle = "checked"
+    else:
+        speed_test_toggle = "unchecked"
 
     file = open(r".checkbox_states.txt", 'w')
-    file.write(numbers_state + "\n" + services_state + "\n" + commands_toggle + "\n" + disk_toggle + "\n" + c_f_toggle + "\n" + font_toggle + "\n" + mystery_toggle + "\n" + time_toggle)
+    file.write(numbers_state + "\n" + services_state + "\n" + commands_toggle + "\n" + disk_toggle + "\n" + c_f_toggle + "\n" + font_toggle + "\n" + mystery_toggle + "\n" + server_time_toggle + "\n" + speed_test_toggle)
     file.close()
     return '', 204
 

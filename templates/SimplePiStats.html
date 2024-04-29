@@ -51,7 +51,7 @@
     </div>
     <div class="centered_div">
         <div class="data" id="rebootClock">
-            <h2 class="heading" style="white-space: initial">Last system restart</h2>
+            <h2 class="heading" style="white-space: initial">System last restarted</h2>
             <div id="bootTime" class="innerContainer">
                 <div class="bootTime" id="bootTimeNum">
                     <p class="rebootTimeNum" id="daysNum" style="flex-grow: 1; text-align: left; margin-left: 16px;"></p>
@@ -107,7 +107,7 @@
                 <form action="/update_settings" method="POST">
                     <div class="setting-block">
                         <input type="checkbox" id="temp_toggle" class="toggle_switch" style="display: inline-block" name="numbers_toggle" {{ numbers_checkbox_state }}>
-                        <label for="temp_toggle" class="toggle_switch" style="padding-right: 10px;">Show CPU load and temperature numbers</label>
+                        <label for="temp_toggle" class="toggle_switch" style="padding-right: 10px;">Hide CPU load and temperature numbers</label>
                     </div>
                     <div class="setting-block">
                         <input type="checkbox" id="services_toggle" class="toggle_switch" style="display: inline-block" name="services_toggle" {{ services_checkbox_state }}>
@@ -126,12 +126,16 @@
                         <label for="c_f_toggle" class="toggle_switch" style="padding-right: 10px;">Use Fahrenheit</label>
                     </div>
                     <div class="setting-block">
-                        <input type="checkbox" id="font_toggle" class="toggle_switch" style="display: inline-block" onclick="toggle_font()" name="font_toggle" {{ font_checkbox_state }}>
-                        <label for="font_toggle" class="toggle_switch" style="padding-right: 10px">Use Comic Sans (this will have no effect if Comic Sans is not installed)</label>
-                    </div>
-                    <div class="setting-block">
                         <input type="checkbox" id="serverTimeToggle" class="toggle_switch" style="display: inline-block" name="serverTimeToggle" {{ time_checkbox_state }}>
                         <label for="serverTimeToggle" class="toggle_switch" style="padding-right: 10px">Hide server time</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="speedToggle" class="toggle_switch" style="display: inline-block" name="speedToggle" {{ speed_checkbox_state }}>
+                        <label for="speedToggle" class="toggle_switch" style="padding-right: 10px">Hide speed test</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="font_toggle" class="toggle_switch" style="display: inline-block" onclick="toggle_font()" name="font_toggle" {{ font_checkbox_state }}>
+                        <label for="font_toggle" class="toggle_switch" style="padding-right: 10px">Use Comic Sans (this will have no effect if Comic Sans is not installed)</label>
                     </div>
                     <div class="setting-block">
                         <input type="checkbox" id="mysteryToggle" class="toggle_switch" style="display: inline-block" name="mysteryToggle" {{ mystery_checkbox_state }}>
@@ -156,19 +160,6 @@
     </form>
 
 <script>
-    fetch('/speed_test', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById("speedTest").querySelector('#ping').innerText = data.ping;
-        document.getElementById("speedTest").querySelector('#upload').innerText = data.upload;
-        document.getElementById("speedTest").querySelector('#download').innerText = data.download;
-    })
-
     function handle_button_action(buttonId) {
         fetch('/button_action', {
             method: 'POST',
@@ -238,10 +229,13 @@
         }
     }
 
-    // Yes, this is out here for a reason, DON'T move it, you WILL break things!!
+    // Yes, these are out here for a reason, DON'T move them, you WILL break things!!
     const dataBackroundColor = document.getElementById("divBgColor");
+    const speed_test_element = document.getElementById("speedTest")
     
     document.addEventListener("DOMContentLoaded", function() {
+
+        //elements
         const temp_numbers_element = document.getElementById('temp_numbers');
         const services_element = document.getElementById('services');
         const cpu_status_numbers_element = document.getElementById('cpu_status_numbers');
@@ -249,6 +243,8 @@
         const mystery_element = document.getElementById("runCommandHeading");
         const disk_element = document.getElementById("extDisks");
         const server_time_element = document.getElementById("serverTimeBlock");
+
+        //toggles
         const temp_toggle = document.getElementById('temp_toggle');
         const services_toggle = document.getElementById('services_toggle');
         const c_f_toggle = document.getElementById('c_f_toggle');
@@ -257,29 +253,53 @@
         const mystery_toggle = document.getElementById("mysteryToggle");
         const disk_toggle = document.getElementById("diskToggle");
         const server_time_toggle = document.getElementById("serverTimeToggle");
+        const speed_test_toggle = document.getElementById("speedToggle")
+
+        function hideElement(toggle, element, dispType) {
+            for (var i = 0; i<element.length; i++) {
+                if (toggle.checked) {
+                    element[i].style.display = 'none';
+                }
+                else {
+                    element[i].style.display = dispType[i];
+                }
+            }
+        }
+
+        hideElement(temp_toggle, [temp_numbers_element, cpu_status_numbers_element], ["block", "block"])
+        hideElement(services_toggle, [services_element], ["block"])
+        hideElement(disk_toggle, [disk_element], ["block"])
+        hideElement(commands_toggle, [commands_element], ["block"])
+        hideElement(server_time_toggle, [server_time_element], ["inline-block"])
+        hideElement(speed_test_toggle, [speed_test_element], ["inline"])
+
+
 
         // Check if the checkboxes are checked when the page loads
-        if (temp_toggle.checked) {
-            temp_numbers_element.style.display = 'block';
-            cpu_status_numbers_element.style.display = 'block';
-        } else {
-            temp_numbers_element.style.display = 'none';
-            cpu_status_numbers_element.style.display = 'none';
-        }
 
-        if (services_toggle.checked) {
-            services_element.style.display = 'none';
-        }
-        else {
-            services_element.style.display = 'block';
-        }
+        // if (temp_toggle.checked) {
+        //     temp_numbers_element.style.display = 'block';
+        //     cpu_status_numbers_element.style.display = 'block';
+        // } else {
+        //     temp_numbers_element.style.display = 'none';
+        //     cpu_status_numbers_element.style.display = 'none';
+        // }
 
-        if (disk_toggle.checked) {
-            disk_element.style.display = 'none';
-        }
-        else {
-            disk_element.style.display = 'block';
-        }
+        
+
+        // if (services_toggle.checked) {
+        //     services_element.style.display = 'none';
+        // }
+        // else {
+        //     services_element.style.display = 'block';
+        // }
+
+        // if (disk_toggle.checked) {
+        //     disk_element.style.display = 'none';
+        // }
+        // else {
+        //     disk_element.style.display = 'block';
+        // }
 
         if (c_f_toggle.checked) {
             document.getElementById("temp_numbers").innerHTML = "{{ Fahrenheit }}"
@@ -295,20 +315,6 @@
             document.documentElement.style.fontFamily = "verdana, Roboto"
         }
 
-        if (commands_toggle.checked) {
-            commands_element.style.display = 'none';
-        }
-        else {
-            commands_element.style.display = 'block';
-        }
-
-        if (server_time_toggle.checked) {
-            server_time_element.style.display = 'none';
-        }
-        else {
-            server_time_element.style.display = 'inline-block';
-        }
-
         if (mystery_toggle.checked) {
             mystery_element.innerText = "Run a fucking command! NOW!"
         }
@@ -316,52 +322,46 @@
             mystery_element.innerText = "Run a command"
         }
 
-        temp_toggle.addEventListener('change', () => {
-            if (temp_toggle.checked) {
-                temp_numbers_element.style.display = 'block';
-                cpu_status_numbers_element.style.display = 'block';
-            }
-            else {
-                temp_numbers_element.style.display = 'none';
-                cpu_status_numbers_element.style.display = 'none';
-            }
-        });
 
-        services_toggle.addEventListener('change', () => {
-            if (services_toggle.checked) {
-                services_element.style.display = 'none';
-            }
-            else {
-                services_element.style.display = 'block';
-            }
-        });
-        
-        commands_toggle.addEventListener('change', () => {
-            if (commands_toggle.checked) {
-                commands_element.style.display = "none"
-            }
-            else {
-                commands_element.style.display = "block"
-            }
-        });
+        function hideElementOnLoad(toggle, element, dispType) {
+            toggle.addEventListener('change', () => {
+                for (var i = 0; i<element.length; i++) {
+                    if (toggle.checked) {
+                        element[i].style.display = 'none';
+                    }
+                    else {
+                        element[i].style.display = dispType[i];
+                    }
+                }
+            })
+        }
 
-        server_time_toggle.addEventListener('change', () => {
-            if (server_time_toggle.checked) {
-                server_time_element.style.display = "none"
-            }
-            else {
-                server_time_element.style.display = "inline-block"
-            }
-        });
+        hideElementOnLoad(temp_toggle, [temp_numbers_element, cpu_status_numbers_element], ["block", "block"])
+        hideElementOnLoad(services_toggle, [services_element], ["block"])
+        hideElementOnLoad(disk_toggle, [disk_element], ["block"])
+        hideElementOnLoad(commands_toggle, [commands_element], ["block"])
+        hideElementOnLoad(server_time_toggle, [server_time_element], ["inline-block"])
+        hideElementOnLoad(speed_test_toggle, [speed_test_element], ["inline"])
 
-        disk_toggle.addEventListener('change', () => {
-            if (disk_toggle.checked) {
-                disk_element.style.display = "none"
-            }
-            else {
-                disk_element.style.display = "block"
-            }
-        });
+    if (speed_test_element.style.display != "none") {
+        fetch('/speed_test', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            speed_test_element.querySelector('#ping').innerText = data.ping;
+            speed_test_element.querySelector('#upload').innerText = data.upload;
+            speed_test_element.querySelector('#download').innerText = data.download;
+        })
+    }
+    else {
+        for (child of speed_test_element.children) {
+            child.children[1].innerText = "Please reload"
+        }
+    }
 
         c_f_toggle.addEventListener('change', () => {
             if (c_f_toggle.checked) {
@@ -462,6 +462,7 @@
             updateTimeSince(bootTime);
         }, 1000);
     });
+
 
     function showSettings() {
         document.getElementById('settings').style.display = "inline"
