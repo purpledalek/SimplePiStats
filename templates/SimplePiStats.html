@@ -156,6 +156,19 @@
     </form>
 
 <script>
+    fetch('/speed_test', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("speedTest").querySelector('#ping').innerText = data.ping;
+        document.getElementById("speedTest").querySelector('#upload').innerText = data.upload;
+        document.getElementById("speedTest").querySelector('#download').innerText = data.download;
+    })
+
     function handle_button_action(buttonId) {
         fetch('/button_action', {
             method: 'POST',

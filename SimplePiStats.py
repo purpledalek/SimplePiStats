@@ -79,6 +79,19 @@ def service_check(service_):
     return output
 
 
+@app.route("/speed_test", methods=['POST'])
+def speed_test():
+    response = subprocess.Popen('/usr/bin/speedtest --accept-license --accept-gdpr', shell=True, stdout=subprocess.PIPE).stdout.read().decode('utf-8')
+    ping = re.search('Latency:\s+(.*?s)', response, re.MULTILINE)
+    download = re.search('Download:\s+(.*?s)', response, re.MULTILINE)
+    upload = re.search('Upload:\s+(.*?s)', response, re.MULTILINE)
+
+    ping = ping.group(1)
+    download = download.group(1)
+    upload = upload.group(1)
+
+    return jsonify({"ping": ping, "download": download, "upload": upload})
+
 if not os.path.exists(r"./config.ini"):
     config["SimplePiStats"] = {
         "bg_color": "\"#084e0a\"",
