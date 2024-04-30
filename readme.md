@@ -1,7 +1,7 @@
 # SimplePiStats
 A simple UI designed for people running their Raspberry Pi as a server, and who quick and easy to read stats and control of their system.
 
-# Please ensure you are using Raspbian Bullseye for the internet speed test to work
+## Please ensure you are using Raspbian Bullseye for the internet speed test to work
 
 ## How to install/update
 Simply change directory (`cd`) into the directory where you want to store SimplePiStats, then run the following command:

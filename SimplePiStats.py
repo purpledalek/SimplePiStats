@@ -42,7 +42,7 @@ def service_check(service_):
         service_ = service_.lower().replace(" --no_restart", "")
     if "/" in service_:
         service = service_.split("/")[0]
-        output += f"<div class=\"service\" id=\"{service}\"> <div class=\"text\">"
+        output += f"<div class=\"service innerContainer\" id=\"{service}\"> <div class=\"text\">"
         port = service_.split("/")[1]
         desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
         if "-" in desc:
@@ -50,7 +50,7 @@ def service_check(service_):
         output += f"<a class=\"service_stats\" id=\"{port}\" target=\"_blank\">{desc}</a>"
     else:
         service = service_
-        output += f"<div class=\"service\" id=\"{service}\"> <div class=\"text\">"
+        output += f"<div class=\"service innerContainer\" id=\"{service}\"> <div class=\"text\">"
         desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
         if "-" in desc:
             desc = service.title()
@@ -58,16 +58,22 @@ def service_check(service_):
     status_check = subprocess.run(["systemctl", "is-active", service], stdout=subprocess.PIPE, text=True).stdout.strip()
     for file in os.listdir(r"service_icons"):
         if service.lower() == file.split(".")[0].lower():
-            output += f"<img class=\"service_icon\" src=\"service_icons/{file}\">"
+            if status_check == "inactive":
+                output += f"<img class=\"service_icon bw\" src=\"service_icons/{file}\">"
+            else:
+                output += f"<img class=\"service_icon\" src=\"service_icons/{file}\">"
         else:
             pass
     if status_check == "active":
-        output += "<p id=\"status\"> 🟢 </p>"
+        service_boot_time = subprocess.run(["systemctl", "show", "--property=ActiveEnterTimestamp", service], stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")
+        reboot_duration = datetime.datetime.now().replace(tzinfo=pytz.utc, microsecond=0) - dateparser.parse(service_boot_time).replace(tzinfo=pytz.utc, microsecond=0)
+        if reboot_duration.seconds < 60:
+            reboot_duration = "less than a minute ago"
+        else:
+            reboot_duration = humanize.naturaltime(reboot_duration, minimum_unit='seconds')
+        output += f"<p id=\"status\"> 🟢 </p></div><p id=\"serviceReboot\">Service last restarted {reboot_duration}</p>"
     else:
-        output += "<p id=\"status\"> 🔴 </p>"
-    output += "</div>"
-    service_boot_time = subprocess.run(["systemctl", "show", "--property=ActiveEnterTimestamp", service], stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")
-    output += f"Service last restarted {humanize.naturaltime(datetime.datetime.now().replace(tzinfo=pytz.utc, microsecond=0) - dateparser.parse(service_boot_time).replace(tzinfo=pytz.utc, microsecond=0), minimum_unit='seconds')}"
+        output += "<p id=\"status\"> 🔴 </p></div><p id=\"serviceReboot\">Service last restarted N/A</p>"
     if stop == True or restart == True:
         output += f"<div class=\"buttons\">"
         if stop == True:
@@ -242,10 +248,18 @@ def button_action():
     time.sleep(0.5)
     status_check = subprocess.run(["systemctl", "is-active", button_action_[1]], stdout=subprocess.PIPE, text=True).stdout.strip()
     if status_check == "active":
-        status_message = " 🟢 "
+        service_boot_time = subprocess.run(["systemctl", "show", "--property=ActiveEnterTimestamp", button_action_[1]], stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")
+        status_message = f" 🟢 "
+        reboot_duration = datetime.datetime.now().replace(tzinfo=pytz.utc, microsecond=0) - dateparser.parse(service_boot_time).replace(tzinfo=pytz.utc, microsecond=0)
+        if reboot_duration.seconds < 60:
+            reboot_duration = "less than a minute ago"
+        else:
+            reboot_duration = humanize.naturaltime(reboot_duration, minimum_unit='seconds')
+        service_reboot = f"Service last restarted {reboot_duration} "
     else:
         status_message = " 🔴 "
-    return jsonify({"service": button_action_[1], "status": status_message})
+        service_reboot = "Service last restarted N/A"
+    return jsonify({"service": button_action_[1], "status": status_message, "serviceReboot": service_reboot})
 
 
 @app.route("/update_settings", methods=["POST"])

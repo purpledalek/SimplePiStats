@@ -31,7 +31,7 @@
     background-color: rgba(1, 1, 1, 0.3);
     margin: 10px;
     padding: 10px;
-    border-radius: 25px;
+    border-radius: 15px;
 }
 
 #rebootClock {
@@ -76,15 +76,15 @@ button {
 
 .service {
     margin-bottom: 50px;
+    padding: 20px;
 }
 
 #services {
     min-width: 464.8px;
-}
-
-#services p {
+    p {
         margin: 0;
         display: inline;
+    }
 }
 
 .group_title_icon {
@@ -178,7 +178,7 @@ a {
     }
 }
 
-#serverTimeBlock {
+.serverTimeBlock {
     display: inline-block;
     width: fit-content;
     vertical-align: top;
@@ -188,8 +188,8 @@ a {
     display: inline
 }
 
-#speedTest {
-    display: inline-block;
+.speedTest {
+    display: inline;
 }
 
 .speedTestData{
@@ -203,8 +203,16 @@ a {
 }
 
 .speedTestTitle {
-    display: block !important;
+    display: block;
     text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+.bw {
+    filter: grayscale();
 }
 
 
@@ -222,13 +230,24 @@ a {
         width: inherit !important;
         padding: 20px;
     }
+    .service {
+        padding-top: 20px;
+        padding-bottom: 20px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
     #services {
         width: 85%;
         min-width: initial;
     }
+    #serviceReboot {
+        font-size: 12px;
+        display: inline-block;
+    }
     #settings_panel {
         width: 50%;
         left: 14%;
+        top: 8%;
     }
     #extDisks {
         width: inherit;
@@ -238,10 +257,10 @@ a {
     }
     .bootTime {
         .rebootTimeNum {
-            font-size: 8vw;
+            font-size: 6vw;
         }
         .rebootTimeWord {
-            font-size: 6vw;
+            font-size: 5vw;
         }
     }
     #driveGrid {
@@ -251,6 +270,8 @@ a {
         width: 87%;
     }
     .speedTestData {
-        display: flex;
+        #download, #upload, #ping {
+            width: fit-content;
+        }
     }
 }

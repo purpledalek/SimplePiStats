@@ -25,27 +25,27 @@
         <button class="systemButton" onclick="showSettings()">Settings</button>
         <button class="systemButton" id="restartSystem" onclick="restartSystem()" style="float: right; margin-right: 0;">Restart system</button>
     </div>
-    <div id="serverTimeBlock">
+    <div class="serverTimeBlock">
         <p style="width: fit-content; display: inline-block;">Server time: </p>
         <div id="serverTimeDiv"></div>
     </div>
-    <div id="speedTest">
+    <div class="speedTest">
         <div class="speedTestData">
             <p class="speedTestTitle"><b>Download</b></p>
             <p id="download" class="innerContainer">
-                Please wait...
+                Please wait
             </p>
         </div>
         <div class="speedTestData">
             <p class="speedTestTitle"><b>Upload</b></p>
             <p id="upload" class="innerContainer">
-                Please wait...
+                Please wait
             </p>
         </div>
         <div class="speedTestData">
             <p class="speedTestTitle"><b>Ping</b></p>
             <p id="ping" class="innerContainer">
-                Please wait...
+                Please wait
             </p>
         </div>
     </div>
@@ -106,8 +106,20 @@
             <div style="width: 100%">
                 <form action="/update_settings" method="POST">
                     <div class="setting-block">
+                        <input type="checkbox" id="serverTimeToggle" class="toggle_switch" style="display: inline-block" name="serverTimeToggle" {{ time_checkbox_state }}>
+                        <label for="serverTimeToggle" class="toggle_switch" style="padding-right: 10px">Hide server time</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="speedToggle" class="toggle_switch" style="display: inline-block" name="speedToggle" {{ speed_checkbox_state }}>
+                        <label for="speedToggle" class="toggle_switch" style="padding-right: 10px">Hide speed test</label>
+                    </div>
+                    <div class="setting-block">
                         <input type="checkbox" id="temp_toggle" class="toggle_switch" style="display: inline-block" name="numbers_toggle" {{ numbers_checkbox_state }}>
                         <label for="temp_toggle" class="toggle_switch" style="padding-right: 10px;">Hide CPU load and temperature numbers</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="diskToggle" class="toggle_switch" style="display: inline-block" name="diskToggle" {{ disk_checkbox_state }}>
+                        <label for="disk_toggle" class="toggle_switch" style="padding-right: 10px">Hide drives section</label>
                     </div>
                     <div class="setting-block">
                         <input type="checkbox" id="services_toggle" class="toggle_switch" style="display: inline-block" name="services_toggle" {{ services_checkbox_state }}>
@@ -118,20 +130,8 @@
                         <label for="commands_toggle" class="toggle_switch" style="padding-right: 10px">Hide commands section</label>
                     </div>
                     <div class="setting-block">
-                        <input type="checkbox" id="diskToggle" class="toggle_switch" style="display: inline-block" name="diskToggle" {{ disk_checkbox_state }}>
-                        <label for="disk_toggle" class="toggle_switch" style="padding-right: 10px">Hide drives section</label>
-                    </div>
-                    <div class="setting-block">
                         <input type="checkbox" id="c_f_toggle" class="toggle_switch" onclick="Fahrenheit()" style="display: inline-block" name="c_f_toggle" {{ fahrenheit_checkbox_state }}>
                         <label for="c_f_toggle" class="toggle_switch" style="padding-right: 10px;">Use Fahrenheit</label>
-                    </div>
-                    <div class="setting-block">
-                        <input type="checkbox" id="serverTimeToggle" class="toggle_switch" style="display: inline-block" name="serverTimeToggle" {{ time_checkbox_state }}>
-                        <label for="serverTimeToggle" class="toggle_switch" style="padding-right: 10px">Hide server time</label>
-                    </div>
-                    <div class="setting-block">
-                        <input type="checkbox" id="speedToggle" class="toggle_switch" style="display: inline-block" name="speedToggle" {{ speed_checkbox_state }}>
-                        <label for="speedToggle" class="toggle_switch" style="padding-right: 10px">Hide speed test</label>
                     </div>
                     <div class="setting-block">
                         <input type="checkbox" id="font_toggle" class="toggle_switch" style="display: inline-block" onclick="toggle_font()" name="font_toggle" {{ font_checkbox_state }}>
@@ -173,6 +173,13 @@
         .then(response => response.json())
         .then(data => {
             document.getElementById(data.service).querySelector('#status').innerText = data.status;
+            document.getElementById(data.service).querySelector("#serviceReboot").innerText = data.serviceReboot
+            if (data.status === " 🔴 ") {
+                document.getElementById(data.service).querySelector(".service_icon").classList.add("bw")
+            }
+            else {
+                document.getElementById(data.service).querySelector(".service_icon").classList.remove("bw")
+            }
         })
     }
 
@@ -231,7 +238,7 @@
 
     // Yes, these are out here for a reason, DON'T move them, you WILL break things!!
     const dataBackroundColor = document.getElementById("divBgColor");
-    const speed_test_element = document.getElementById("speedTest")
+    const speed_test_element = document.getElementsByClassName("speedTest")[0]
     
     document.addEventListener("DOMContentLoaded", function() {
 
@@ -242,7 +249,7 @@
         const commands_element = document.getElementById("runCommand");
         const mystery_element = document.getElementById("runCommandHeading");
         const disk_element = document.getElementById("extDisks");
-        const server_time_element = document.getElementById("serverTimeBlock");
+        const server_time_element = document.getElementsByClassName("serverTimeBlock")[0];
 
         //toggles
         const temp_toggle = document.getElementById('temp_toggle');
@@ -258,49 +265,24 @@
         function hideElement(toggle, element, dispType) {
             for (var i = 0; i<element.length; i++) {
                 if (toggle.checked) {
-                    element[i].style.display = 'none';
+                    element[i].classList.add("hidden");
                 }
                 else {
-                    element[i].style.display = dispType[i];
+                    element[i].classList.remove("hidden");
                 }
             }
         }
-
+        
         hideElement(temp_toggle, [temp_numbers_element, cpu_status_numbers_element], ["block", "block"])
         hideElement(services_toggle, [services_element], ["block"])
         hideElement(disk_toggle, [disk_element], ["block"])
         hideElement(commands_toggle, [commands_element], ["block"])
         hideElement(server_time_toggle, [server_time_element], ["inline-block"])
         hideElement(speed_test_toggle, [speed_test_element], ["inline"])
-
-
-
-        // Check if the checkboxes are checked when the page loads
-
-        // if (temp_toggle.checked) {
-        //     temp_numbers_element.style.display = 'block';
-        //     cpu_status_numbers_element.style.display = 'block';
-        // } else {
-        //     temp_numbers_element.style.display = 'none';
-        //     cpu_status_numbers_element.style.display = 'none';
-        // }
-
         
-
-        // if (services_toggle.checked) {
-        //     services_element.style.display = 'none';
-        // }
-        // else {
-        //     services_element.style.display = 'block';
-        // }
-
-        // if (disk_toggle.checked) {
-        //     disk_element.style.display = 'none';
-        // }
-        // else {
-        //     disk_element.style.display = 'block';
-        // }
-
+        
+        
+        //Check if the checkboxes have changed status on load
         if (c_f_toggle.checked) {
             document.getElementById("temp_numbers").innerHTML = "{{ Fahrenheit }}"
         }
@@ -323,45 +305,45 @@
         }
 
 
-        function hideElementOnLoad(toggle, element, dispType) {
+        function hideElementOnLoad(toggle, element) {
             toggle.addEventListener('change', () => {
                 for (var i = 0; i<element.length; i++) {
                     if (toggle.checked) {
-                        element[i].style.display = 'none';
+                        element[i].classList.add("hidden")
                     }
                     else {
-                        element[i].style.display = dispType[i];
+                        element[i].classList.remove("hidden")
                     }
                 }
             })
         }
 
-        hideElementOnLoad(temp_toggle, [temp_numbers_element, cpu_status_numbers_element], ["block", "block"])
-        hideElementOnLoad(services_toggle, [services_element], ["block"])
-        hideElementOnLoad(disk_toggle, [disk_element], ["block"])
-        hideElementOnLoad(commands_toggle, [commands_element], ["block"])
-        hideElementOnLoad(server_time_toggle, [server_time_element], ["inline-block"])
-        hideElementOnLoad(speed_test_toggle, [speed_test_element], ["inline"])
+        hideElementOnLoad(temp_toggle, [temp_numbers_element, cpu_status_numbers_element])
+        hideElementOnLoad(services_toggle, [services_element])
+        hideElementOnLoad(disk_toggle, [disk_element])
+        hideElementOnLoad(commands_toggle, [commands_element])
+        hideElementOnLoad(server_time_toggle, [server_time_element])
+        hideElementOnLoad(speed_test_toggle, [speed_test_element])
 
-    if (speed_test_element.style.display != "none") {
-        fetch('/speed_test', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            speed_test_element.querySelector('#ping').innerText = data.ping;
-            speed_test_element.querySelector('#upload').innerText = data.upload;
-            speed_test_element.querySelector('#download').innerText = data.download;
-        })
-    }
-    else {
-        for (child of speed_test_element.children) {
-            child.children[1].innerText = "Please reload"
+        if (speed_test_element.style.display != "none") {
+            fetch('/speed_test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                speed_test_element.querySelector('#ping').innerText = data.ping;
+                speed_test_element.querySelector('#upload').innerText = data.upload;
+                speed_test_element.querySelector('#download').innerText = data.download;
+            })
         }
-    }
+        else {
+            for (child of speed_test_element.children) {
+                child.children[1].innerText = "Please reload"
+            }
+        }
 
         c_f_toggle.addEventListener('change', () => {
             if (c_f_toggle.checked) {
