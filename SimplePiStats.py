@@ -14,7 +14,6 @@ import ast
 import re
 
 app = Flask(__name__)
-port = 5555
 
 config = configparser.ConfigParser()
 
@@ -100,6 +99,7 @@ def speed_test():
 
 if not os.path.exists(r"./config.ini"):
     config["SimplePiStats"] = {
+        "port": "5555",
         "bg_color": "\"#084e0a\"",
         "commands": [],
         "drives": [],
@@ -330,6 +330,7 @@ def restart_system():
     threading.Thread(target=reboot).start()
     return jsonify({"status": "System restarting..."})
 
+port = conf_get("port")
 
 ip_addresses = subprocess.check_output(['hostname', '-I']).decode().strip().split(" ")
 del ip_addresses[-1]
