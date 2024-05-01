@@ -32,7 +32,7 @@ Type the following into a web browser `<your pi's local ip address>:5555`. If yo
 ## Editing config file
 You can either edit the config file by clicking the button to edit the config file in settings, or in the command line with your text editor of choice to edit `config.ini`. The correct syntax for each section is explained below
 i
-(Editing the config file in settings may require a restart of SimplePiStats for changes to take effect)
+Editing the `config.ini` file will require a restart of the SimplePiStats service for the changes to take effect
 
 ### Commands
 `commands = ["<name that you want on command button> : <command that you run in the console>"]`
