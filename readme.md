@@ -11,7 +11,7 @@ Simply change directory (`cd`) into the directory where you want to store Simple
 To update SimplePiStats, go to the directory where it's stored, and run the `bash update.sh` from there.
 
 ## How to use
-Type the following into a web browser `<your pi's local ip address>:5555`. If you need help finding your Pi's local IP address, simply ssh into the Pi, and type in `hostname -I`, your Pi's local IP address is everything before the space.
+Type the following into a web browser `<your pi's local ip address>:5555`. If you need help finding your Pi's local IP address, simply ssh into the Pi, and type in `hostname -I`, your Pi's local IP address is everything before the space. If you wish to change which port SimplePiStats runs on, you can change the `port` value in the `config.ini` file.
 
 ### How to read the CPU state
 :] Means your Pi's CPU is happy! (Under 40%)
