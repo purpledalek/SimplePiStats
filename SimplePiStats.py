@@ -27,6 +27,17 @@ def conf_get(option: str):
 def get_image(filename):
     return send_from_directory("service_icons", filename)
 
+if not os.path.exists(r"./config.ini"):
+    config["SimplePiStats"] = {
+        "port": "5555",
+        "bg_color": "'#084e0a'",
+        "commands": [],
+        "drives": [],
+        "services": []
+    }
+    with open("config.ini", "w") as config_file:
+        config.write(config_file)
+
 port = conf_get("port")
 
 def service_check(service_):
@@ -97,17 +108,6 @@ def speed_test():
     upload = upload.group(1)
 
     return jsonify({"ping": ping, "download": download, "upload": upload})
-
-if not os.path.exists(r"./config.ini"):
-    config["SimplePiStats"] = {
-        "port": "5555",
-        "bg_color": "'#084e0a'",
-        "commands": [],
-        "drives": [],
-        "services": []
-    }
-    with open("config.ini", "w") as config_file:
-        config.write(config_file)
 
 if not os.path.exists(r".checkbox_states.txt"):
     with open(r".checkbox_states.txt", 'w') as file:
