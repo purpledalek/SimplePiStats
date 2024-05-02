@@ -17,7 +17,7 @@ fi
 
 # Clone the latest version of the repo
 echo Cloning from repo...
-git clone https://github.com/purpledalek/SimplePiStats.git SimplePiStats > /dev/null 2>&1
+git clone -b main https://github.com/purpledalek/SimplePiStats.git SimplePiStats > /dev/null 2>&1
 
 cd SimplePiStats || return
 
