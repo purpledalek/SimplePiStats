@@ -51,3 +51,7 @@ For any of these sections, you denote a new command/drive/service by adding it a
 You can either change the background color of the data boxes using the color picker in settings, or by editing the hex value in the `config.ini` file
 
 Please note: images may be unstable on iPhone, refreshing is the only known fix for this issue
+
+## Possible features
+- The ability to display Docker container information
+- More icons for popular services
