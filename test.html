@@ -1,0 +1,12 @@
+<body>
+    <form onsubmit="runScript(this.children[0].value)">
+        <input type="text", value="hello">
+        <button type="submit">Submit to the DALEKS!!</button>
+    </form>
+    <script>
+        function runScript(log) {
+            event.preventDefault()
+            console.log(log)
+        }
+    </script>
+</body>

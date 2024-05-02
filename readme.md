@@ -11,7 +11,7 @@ Simply change directory (`cd`) into the directory where you want to store Simple
 To update SimplePiStats, go to the directory where it's stored, and run the `bash update.sh` from there.
 
 ## How to use
-Type the following into a web browser `<your pi's local ip address>:5555`. If you need help finding your Pi's local IP address, simply ssh into the Pi, and type in `hostname -I`, your Pi's local IP address is everything before the space. If you wish to change which port SimplePiStats runs on, you can change the `port` value in the `config.ini` file.
+Type the following into a web browser `<your pi's local ip address>:5555`. If you need help finding your Pi's local IP address, simply ssh into the Pi, and type in `hostname -I`, your Pi's local IP address is everything before the space. If you wish to change which port SimplePiStats runs on, you can change the `port` value in the config in settings.
 
 ### How to read the CPU state
 :] Means your Pi's CPU is happy! (Under 40%)
@@ -30,9 +30,7 @@ Type the following into a web browser `<your pi's local ip address>:5555`. If yo
 (Numbers can be accessed for these statistics in Settings if you want a more accurate readout)
 
 ## Editing config file
-You can either edit the config file by clicking the button to edit the config file in settings, or in the command line with your text editor of choice to edit `config.ini`. The correct syntax for each section is explained below
-i
-Editing the `config.ini` file will require a restart of the SimplePiStats service for the changes to take effect
+You can either edit the config file by clicking the `Edit config` button in settings, or in the command line with your text editor of choice. The correct syntax for each section is outlined below.
 
 ### Commands
 `commands = ["<name that you want on command button> : <command that you run in the console>"]`

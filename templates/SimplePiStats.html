@@ -101,8 +101,8 @@
         </div>
     </div>
 
-    <div id="settings">
-        <div id="settings_panel">
+    <div id="settings" class="dimBackground">
+        <div class="settings_panel">
             <div style="width: 100%">
                 <form action="/update_settings" method="POST">
                     <div class="setting-block">
@@ -153,11 +153,33 @@
             </div>
         </div>
     </div>
-
-    <form id="edit_config" style="display: none; top: 25%; left: 5%; width: 90%; position: absolute;" onsubmit="updateConfig(this)">
-        <textarea style="height: 800px; width: 100%;">{{ config_file }}</textarea>
-        <button type="submit">Save (May require restarting SimplePiStats for changes to take effect)</button>
-    </form>
+    <div id="edit_config" class="dimBackground">
+        <div class="settings_panel">
+            <form onsubmit="updateConfig(this)">
+                <div>
+                    <label for="portConfig">Port</label>
+                    <input id="portConfig" value="{{ port }}" autocomplete="off">
+                </div>
+                <div>
+                    <label for="bg_colorConfig">Data background color</label>
+                    <input id="bg_colorConfig" value="{{ div_color }}" autocomplete="off">
+                </div>
+                <div>
+                    <label for="commandsConfig">Commands</label>
+                    <input id="commandsConfig" value="{{ commandsConfig }}" autocomplete="off">
+                </div>
+                <div>
+                    <label for="drivesConfig">Drives</label>
+                    <input id="drivesConfig" value="{{ drivesConfig }}" autocomplete="off">
+                </div>
+                <div>
+                    <label for="servicesConfig">Services</label>
+                    <input id="servicesConfig" value="{{ servicesConfig }}" autocomplete="off">
+                </div>
+                <button type="submit">Save and reload</button>
+            </form>
+        </div>
+    </div>
 
 <script>
     function handle_button_action(buttonId) {
@@ -463,10 +485,18 @@
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                config_data: form.children[0].value
+                config_data: [
+                    [form.children[0].children[1].id, form.children[0].children[1].value],
+                    [form.children[1].children[1].id, form.children[1].children[1].value],
+                    [form.children[2].children[1].id, form.children[2].children[1].value],
+                    [form.children[3].children[1].id, form.children[3].children[1].value],
+                    [form.children[4].children[1].id, form.children[4].children[1].value]
+                ]
             }),
         })
-        document.getElementById("edit_config").style.display = "none"
+        .then(response => {
+                window.location.reload(true);
+            })
     }
 
     function hideSettings() {

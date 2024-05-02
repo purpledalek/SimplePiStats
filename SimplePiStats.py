@@ -27,6 +27,7 @@ def conf_get(option: str):
 def get_image(filename):
     return send_from_directory("service_icons", filename)
 
+port = conf_get("port")
 
 def service_check(service_):
     output = ""
@@ -100,7 +101,7 @@ def speed_test():
 if not os.path.exists(r"./config.ini"):
     config["SimplePiStats"] = {
         "port": "5555",
-        "bg_color": "\"#084e0a\"",
+        "bg_color": "'#084e0a'",
         "commands": [],
         "drives": [],
         "services": []
@@ -223,7 +224,7 @@ def index():
                     ext_drives.append(f"<p class=\"driveData\">{used}B used</p>")
             ext_drives.append("</div>")
             count = count + 1
-    return render_template("SimplePiStats.html", cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), numbers_checkbox_state=file_contents[0], services_checkbox_state=file_contents[1], fahrenheit_checkbox_state=file_contents[2], commands_checkbox_state=file_contents[3], disk_checkbox_state=file_contents[4], font_checkbox_state=file_contents[5], mystery_checkbox_state=file_contents[6], time_checkbox_state=file_contents[7], speed_checkbox_state=file_contents[8], command_buttons=" ".join(command_buttons), ext_drives=" ".join(ext_drives), server_time=server_time, div_color=conf_get("bg_color"), config_file=open(r"config.ini", "r").read())
+    return render_template("SimplePiStats.html", cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), numbers_checkbox_state=file_contents[0], services_checkbox_state=file_contents[1], fahrenheit_checkbox_state=file_contents[2], commands_checkbox_state=file_contents[3], disk_checkbox_state=file_contents[4], font_checkbox_state=file_contents[5], mystery_checkbox_state=file_contents[6], time_checkbox_state=file_contents[7], speed_checkbox_state=file_contents[8], command_buttons=" ".join(command_buttons), ext_drives=" ".join(ext_drives), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"))
 
 @app.route('/save_color', methods=['POST'])
 def save_color():
@@ -236,9 +237,18 @@ def save_color():
 @app.route('/edit_config', methods=['POST'])
 def edit_config():
     config_data = request.json['config_data']
-    file = open(r"config.ini", "w")
-    file.write(config_data)
-    file.close()
+    changed = False
+    for key, value in config_data:
+        key = key.replace("Config", "")
+        if key == "bg_color":
+            value = '"' + value + '"'
+        if value != config.get("SimplePiStats", key):
+            changed = True
+            config.set("SimplePiStats", key, value)
+        if changed == True:
+            with open(r"config.ini", "w") as config_file:
+                config.write(config_file)
+            changed = False
     return '', 204
 
 @app.route('/button_action', methods=['POST'])
@@ -329,8 +339,6 @@ def reboot():
 def restart_system():
     threading.Thread(target=reboot).start()
     return jsonify({"status": "System restarting..."})
-
-port = conf_get("port")
 
 ip_addresses = subprocess.check_output(['hostname', '-I']).decode().strip().split(" ")
 del ip_addresses[-1]
