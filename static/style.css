@@ -247,7 +247,7 @@ a {
         font-size: 12px;
         display: inline-block;
     }
-    #settings_panel {
+    .settings_panel {
         width: 50%;
         left: 14%;
         top: 8%;

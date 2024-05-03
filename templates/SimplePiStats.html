@@ -177,11 +177,16 @@
                     <input id="servicesConfig" value="{{ servicesConfig }}" autocomplete="off">
                 </div>
                 <button type="submit">Save and reload</button>
+                <button type="submit" onclick="hideConfigEdit()" style="float: right;">Close and don't save</button>
             </form>
         </div>
     </div>
 
 <script>
+    function hideConfigEdit() {
+        event.preventDefault()
+        document.getElementById('edit_config').style.display = 'none'
+    }
     function handle_button_action(buttonId) {
         fetch('/button_action', {
             method: 'POST',
@@ -473,6 +478,7 @@
     }
 
     function ShowEditConfigBox() {
+        event.preventDefault()
         document.getElementById('settings').style.display = "none"
         document.getElementById("edit_config").style.display = "block"
     }
@@ -495,11 +501,12 @@
             }),
         })
         .then(response => {
-                window.location.reload(true);
+                window.location.reload();
             })
     }
 
     function hideSettings() {
+        event.preventDefault()
         document.getElementById('settings').style.display = "none"
     }
 
