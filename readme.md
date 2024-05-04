@@ -5,9 +5,11 @@ A simple UI designed for people running their Raspberry Pi as a server, and who 
 
 ## How to install/update
 Simply change directory (`cd`) into the directory where you want to store SimplePiStats, then run the following command:
+
 `bash <(curl -s https://raw.githubusercontent.com/purpledalek/SimplePiStats/main/install.sh)`
 
 If you with to use SimplePiStats without a virtual environment (venv), use the following command instead:
+
 `bash <(curl -s https://raw.githubusercontent.com/purpledalek/SimplePiStats/main/install_non-venv.sh)`
 
 ## How to use
