@@ -10,7 +10,7 @@ Simply change directory (`cd`) into the directory where you want to store Simple
 
 If you with to use SimplePiStats without a virtual environment (venv), use the following command instead:
 
-`bash <(curl -s https://raw.githubusercontent.com/purpledalek/SimplePiStats/main/install_non-venv.sh)`
+`bash <(curl -s https://raw.githubusercontent.com/purpledalek/SimplePiStats/main/non-venv_install.sh)`
 
 ## How to use
 Type the following into a web browser `<your pi's local ip address>:5555`. If you need help finding your Pi's local IP address, simply ssh into the Pi, and type in `hostname -I`, your Pi's local IP address is everything before the space. If you wish to change which port SimplePiStats runs on, you can change the `port` value in the config in settings.

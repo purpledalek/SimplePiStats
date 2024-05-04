@@ -54,7 +54,7 @@ fi
 
 # Remove unnecessary local files
 echo Cleaning up...
-rm install.sh readme.md SimplePiStats.service requirements.txt .gitignore
+rm update.sh install.sh non-venv_install.sh readme.md SimplePiStats.service requirements.txt .gitignore
 rm -rf .git
 
 # Enable the service
