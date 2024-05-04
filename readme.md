@@ -5,10 +5,10 @@ A simple UI designed for people running their Raspberry Pi as a server, and who 
 
 ## How to install/update
 Simply change directory (`cd`) into the directory where you want to store SimplePiStats, then run the following command:
-
 `bash <(curl -s https://raw.githubusercontent.com/purpledalek/SimplePiStats/main/install.sh)`
 
-To update SimplePiStats, go to the directory where it's stored, and run the `bash update.sh` from there.
+If you with to use SimplePiStats without a virtual environment (venv), use the following command instead:
+`bash <(curl -s https://raw.githubusercontent.com/purpledalek/SimplePiStats/main/install_non-venv.sh)`
 
 ## How to use
 Type the following into a web browser `<your pi's local ip address>:5555`. If you need help finding your Pi's local IP address, simply ssh into the Pi, and type in `hostname -I`, your Pi's local IP address is everything before the space. If you wish to change which port SimplePiStats runs on, you can change the `port` value in the config in settings.
@@ -51,6 +51,9 @@ For any of these sections, you denote a new command/drive/service by adding it a
 You can either change the background color of the data boxes using the color picker in settings, or by editing the hex value in the `config.ini` file
 
 Please note: images may be unstable on iPhone, refreshing is the only known fix for this issue
+
+## Adding custom CSS
+You can add a custom CSS file by putting it in the `static` folder, then adding the filename to the config. For example if you have a CSS file called myCustomStyle.css, you can put that in the `static` folder and then add "myCustomStyle.css" to the custom_css line of the config. Any changes made to elements in your custom css file will overwrite the default style for that element.
 
 ## Possible features
 - The ability to display Docker container information

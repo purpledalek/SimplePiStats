@@ -23,18 +23,13 @@ cd SimplePiStats || return
 
 # Install dependencies
 echo Installing dependencies...
-# Create Venv
-python -m venv venv
-# Get into venv
-source venv/bin/activate
-pip install -r requirements.txt  > /dev/null 2>&1
+python -m pip install -r requirements.txt --break-system-packages  > /dev/null 2>&1
 curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash > /dev/null 2>&1
 sudo apt-get install speedtest > /dev/null 2>&1
-# Get out of venv
-deactivate
+
 # Update service file with correct paths
 echo Setting up file structure...
-sed -i "s|WorkingDirectory=.*|WorkingDirectory=$(pwd)/|; s|User=.*|User=$(whoami)|; s|ExecStart=/path/to/file/|ExecStart=$(pwd)/|;" SimplePiStats.service
+sed -i "s|WorkingDirectory=.*|WorkingDirectory=$(pwd)|; s|User=.*|User=$(whoami)|" SimplePiStats.service
 
 # Remove existing service file and directory
 echo Setting up service and relocating files...
