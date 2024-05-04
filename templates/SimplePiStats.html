@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width">
     <title>SimplePiStats</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename=custom_css) }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
     <script>
         function change_link() {
@@ -96,7 +97,7 @@
         <div class="data" id="extDisks">
             <h2 class="heading" id="extDisksHeading">Drives</h2>
             <div id="driveGrid">
-                {{ ext_drives|safe }}
+                Please wait
             </div>
         </div>
     </div>
@@ -104,17 +105,17 @@
     <div id="settings" class="dimBackground">
         <div class="settings_panel">
             <div style="width: 100%">
-                <form action="/update_settings" method="POST">
+                <form action="/update_settings" method="POST" onsubmit="hideSettings()">
                     <div class="setting-block">
                         <input type="checkbox" id="serverTimeToggle" class="toggle_switch" style="display: inline-block" name="serverTimeToggle" {{ time_checkbox_state }}>
                         <label for="serverTimeToggle" class="toggle_switch" style="padding-right: 10px">Hide server time</label>
                     </div>
                     <div class="setting-block">
-                        <input type="checkbox" id="speedToggle" class="toggle_switch" style="display: inline-block" name="speedToggle" {{ speed_checkbox_state }}>
+                        <input type="checkbox" id="speedToggle" class="toggle_switch" style="display: inline-block" name="speedTestToggle" {{ speed_checkbox_state }}>
                         <label for="speedToggle" class="toggle_switch" style="padding-right: 10px">Hide speed test (Having this hidden will reduce internet usage, as it doesn't send the request to Ookla)</label>
                     </div>
                     <div class="setting-block">
-                        <input type="checkbox" id="temp_toggle" class="toggle_switch" style="display: inline-block" name="numbers_toggle" {{ numbers_checkbox_state }}>
+                        <input type="checkbox" id="temp_toggle" class="toggle_switch" style="display: inline-block" name="numbersToggle" {{ numbers_checkbox_state }}>
                         <label for="temp_toggle" class="toggle_switch" style="padding-right: 10px;">Hide CPU load and temperature numbers</label>
                     </div>
                     <div class="setting-block">
@@ -122,7 +123,7 @@
                         <label for="disk_toggle" class="toggle_switch" style="padding-right: 10px">Hide drives section</label>
                     </div>
                     <div class="setting-block">
-                        <input type="checkbox" id="services_toggle" class="toggle_switch" style="display: inline-block" name="services_toggle" {{ services_checkbox_state }}>
+                        <input type="checkbox" id="services_toggle" class="toggle_switch" style="display: inline-block" name="servicesToggle" {{ services_checkbox_state }}>
                         <label for="services_toggle" class="toggle_switch" style="padding-right: 10px;">Hide services section</label>
                     </div>
                     <div class="setting-block">
@@ -130,11 +131,11 @@
                         <label for="commands_toggle" class="toggle_switch" style="padding-right: 10px">Hide commands section</label>
                     </div>
                     <div class="setting-block">
-                        <input type="checkbox" id="c_f_toggle" class="toggle_switch" onclick="Fahrenheit()" style="display: inline-block" name="c_f_toggle" {{ fahrenheit_checkbox_state }}>
+                        <input type="checkbox" id="c_f_toggle" class="toggle_switch" onclick="Fahrenheit()" style="display: inline-block" name="cfToggle" {{ fahrenheit_checkbox_state }}>
                         <label for="c_f_toggle" class="toggle_switch" style="padding-right: 10px;">Use Fahrenheit</label>
                     </div>
                     <div class="setting-block">
-                        <input type="checkbox" id="font_toggle" class="toggle_switch" style="display: inline-block" onclick="toggle_font()" name="font_toggle" {{ font_checkbox_state }}>
+                        <input type="checkbox" id="font_toggle" class="toggle_switch" style="display: inline-block" onclick="toggle_font()" name="fontToggle" {{ font_checkbox_state }}>
                         <label for="font_toggle" class="toggle_switch" style="padding-right: 10px">Use Comic Sans (this will have no effect if Comic Sans is not installed)</label>
                     </div>
                     <div class="setting-block">
@@ -148,7 +149,7 @@
                     <div class="setting-block">
                         <button onclick="ShowEditConfigBox()">Edit config...</button>
                     </div>
-                    <button type="submit" id="close_button" onclick="hideSettings()" style="margin-right: 0;">Close</button>
+                    <button type="submit" id="close_button" style="margin-right: 0;">Close</button>
                 </form>
             </div>
         </div>
@@ -156,6 +157,10 @@
     <div id="edit_config" class="dimBackground">
         <div class="settings_panel">
             <form onsubmit="updateConfig(this)">
+                <div>
+                    <label for="addressConfig">Listen address*</label>
+                    <input id="addressConfig" value="{{ addressConfig }}" autocomplete="off">
+                </div>
                 <div>
                     <label for="portConfig">Port</label>
                     <input id="portConfig" value="{{ port }}" autocomplete="off">
@@ -176,9 +181,14 @@
                     <label for="servicesConfig">Services</label>
                     <input id="servicesConfig" value="{{ servicesConfig }}" autocomplete="off">
                 </div>
+                <div>
+                    <label for="custom_css">Custom CSS file name (Checks the static folder)</label>
+                    <input id="custom_css" value="{{ custom_css }}" autocomplete="off">
+                </div>
                 <button type="submit">Save and reload</button>
                 <button type="submit" onclick="hideConfigEdit()" style="float: right;">Close and don't save</button>
             </form>
+            <p>*Changing this will requrire a restart of SimplePiStats to take effect</p>
         </div>
     </div>
 
@@ -372,6 +382,24 @@
             }
         }
 
+        if (disk_element.style.display != "none") {
+            fetch('/disk_usage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.text())
+            .then((text) => {
+                driveGrid.innerHTML = text;
+            });
+        }
+        else {
+            for (child of speed_test_element.children) {
+                child.children[1].innerText = "Please reload"
+            }
+        }
+
         c_f_toggle.addEventListener('change', () => {
             if (c_f_toggle.checked) {
                 document.getElementById("temp_numbers").innerHTML = "{{ Fahrenheit }}"
@@ -496,7 +524,9 @@
                     [form.children[1].children[1].id, form.children[1].children[1].value],
                     [form.children[2].children[1].id, form.children[2].children[1].value],
                     [form.children[3].children[1].id, form.children[3].children[1].value],
-                    [form.children[4].children[1].id, form.children[4].children[1].value]
+                    [form.children[4].children[1].id, form.children[4].children[1].value],
+                    [form.children[5].children[1].id, form.children[5].children[1].value],
+                    [form.children[6].children[1].id, form.children[6].children[1].value]
                 ]
             }),
         })
@@ -506,7 +536,6 @@
     }
 
     function hideSettings() {
-        event.preventDefault()
         document.getElementById('settings').style.display = "none"
     }
 

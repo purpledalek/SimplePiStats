@@ -12,6 +12,7 @@ import humanize
 import configparser
 import ast
 import re
+import json
 
 app = Flask(__name__)
 
@@ -29,15 +30,19 @@ def get_image(filename):
 
 if not os.path.exists(r"./config.ini"):
     config["SimplePiStats"] = {
+        "address": '"0.0.0.0"',
         "port": "5555",
-        "bg_color": "'#084e0a'",
+        "bg_color": '"#084e0a"',
         "commands": [],
         "drives": [],
-        "services": []
+        "services": [],
+        "custom_css": '""'
     }
     with open("config.ini", "w") as config_file:
         config.write(config_file)
 
+# Set up listen address and port numbers
+listen_address = conf_get("address")
 port = conf_get("port")
 
 def service_check(service_):
@@ -109,16 +114,21 @@ def speed_test():
 
     return jsonify({"ping": ping, "download": download, "upload": upload})
 
-if not os.path.exists(r".checkbox_states.txt"):
-    with open(r".checkbox_states.txt", 'w') as file:
-        file.write("unchecked\n" * 9)
+checkboxes = ["serverTimeToggle", "speedTestToggle", "numbersToggle", "diskToggle", "servicesToggle", "commandsToggle", "cfToggle", "fontToggle", "mysteryToggle"]
+
+if not os.path.exists(r".checkbox_states.json"):
+    with open(r".checkbox_states.json", 'w') as file:
+        init_dict = {}
+        for box in checkboxes:
+            init_dict[box] = "unchecked"
+        file.write(json.dumps(init_dict, indent=len(init_dict)))
         file.close()
 
 def create_command_buttons():
     buttons = []
     commands = conf_get("commands")
     if commands == []:
-        buttons.append("<p>No commands found. Please add commands names to config.ini to use this feature, or you can hide it using settings. See the <a href=\"https://github.com/purpledalek/SimplePiStats/blob/main/readme.md#editing-config-file\" target=\"_blank\">readme</a> for more info.</p>")
+        buttons.append("<p>No commands found. Please add command names in settings > Edit config to use this feature, or you can hide it using settings. See the <a href=\"https://github.com/purpledalek/SimplePiStats/blob/main/readme.md#editing-config-file\" target=\"_blank\">readme</a> for more info.</p>")
     else:
         for line in commands:
             spl = line.split(":")
@@ -140,8 +150,8 @@ def index():
     else:
         cpu_status = "angry"
 
-    with open(r".checkbox_states.txt", "r") as file:
-        file_contents = file.read().split("\n")
+    with open(r".checkbox_states.json", "r") as file:
+        file_contents = json.load(file)
         file.close()
 
     # 0 - 40 :]
@@ -155,7 +165,7 @@ def index():
 
     __services__ = conf_get("services")
     if __services__ == []:
-        services = ["<p>No services found. Please add commands names to config.ini to use this feature, or you can hide it using settings. See the <a href=\"https://github.com/purpledalek/SimplePiStats/blob/main/readme.md#editing-config-file\" target=\"_blank\">readme</a> for more info.</p>"]
+        services = ["<p>No services found. Please add services in settings > Edit config to use this feature, or you can hide it using settings. See the <a href=\"https://github.com/purpledalek/SimplePiStats/blob/main/readme.md#editing-config-file\" target=\"_blank\">readme</a> for more info.</p>"]
     else:
         for service in __services__:
             if isinstance(service, list):
@@ -185,9 +195,13 @@ def index():
     else:
         temp = "3"
     command_buttons = create_command_buttons()
+    return render_template("SimplePiStats.html", cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), time_checkbox_state=file_contents.get(checkboxes[0]), speed_checkbox_state=file_contents.get(checkboxes[1]), numbers_checkbox_state=file_contents.get(checkboxes[2]), disk_checkbox_state=file_contents.get(checkboxes[3]), services_checkbox_state=file_contents.get(checkboxes[4]), commands_checkbox_state=file_contents.get(checkboxes[5]), fahrenheit_checkbox_state=file_contents.get(checkboxes[6]), font_checkbox_state=file_contents.get(checkboxes[7]), mystery_checkbox_state=file_contents.get(checkboxes[8]), command_buttons=" ".join(command_buttons), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"), addressConfig=listen_address, custom_css=conf_get("custom_css"))
+
+@app.route('/disk_usage', methods=['POST'])
+def disk_usage():
     drives_text_file = conf_get("drives")
     if drives_text_file == []:
-        ext_drives = ["<p>No external drive paths found. Please add commands names to config.ini to use this feature, or you can hide it using settings. See the <a href=\"https://github.com/purpledalek/SimplePiStats/blob/main/readme.md#editing-config-file\" target=\"_blank\">readme</a> for more info.</p>"]
+        ext_drives = ["<p>No external drive paths found. Please add paths in settings > Edit config to use this feature, or you can hide it using settings. See the <a href=\"https://github.com/purpledalek/SimplePiStats/blob/main/readme.md#editing-config-file\" target=\"_blank\">readme</a> for more info.</p>"]
     else:
         paths = []
         for path in drives_text_file:
@@ -224,7 +238,7 @@ def index():
                     ext_drives.append(f"<p class=\"driveData\">{used}B used</p>")
             ext_drives.append("</div>")
             count = count + 1
-    return render_template("SimplePiStats.html", cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), numbers_checkbox_state=file_contents[0], services_checkbox_state=file_contents[1], fahrenheit_checkbox_state=file_contents[2], commands_checkbox_state=file_contents[3], disk_checkbox_state=file_contents[4], font_checkbox_state=file_contents[5], mystery_checkbox_state=file_contents[6], time_checkbox_state=file_contents[7], speed_checkbox_state=file_contents[8], command_buttons=" ".join(command_buttons), ext_drives=" ".join(ext_drives), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"))
+    return " ".join(ext_drives)
 
 @app.route('/save_color', methods=['POST'])
 def save_color():
@@ -240,15 +254,15 @@ def edit_config():
     changed = False
     for key, value in config_data:
         key = key.replace("Config", "")
-        if key == "bg_color":
+        if key == "bg_color" or key == "address" or key == "custom_css":
             value = '"' + value + '"'
         if value != config.get("SimplePiStats", key):
             changed = True
             config.set("SimplePiStats", key, value)
-        if changed == True:
-            with open(r"config.ini", "w") as config_file:
-                config.write(config_file)
-            changed = False
+    if changed == True:
+        with open(r"config.ini", "w") as config_file:
+            config.write(config_file)
+        changed = False
     return '', 204
 
 @app.route('/button_action', methods=['POST'])
@@ -274,53 +288,11 @@ def button_action():
 
 @app.route("/update_settings", methods=["POST"])
 def update_settings():
-    if request.form.get("numbers_toggle"):
-        numbers_state = "checked"
-    else:
-        numbers_state = "unchecked"
-
-    if request.form.get("services_toggle"):
-        services_state = "checked"
-    else:
-        services_state = "unchecked"
-
-    if request.form.get("commands_toggle"):
-        commands_toggle = "checked"
-    else:
-        commands_toggle = "unchecked"
-
-    if request.form.get("disk_toggle"):
-        disk_toggle = "checked"
-    else:
-        disk_toggle = "unchecked"
-
-    if request.form.get("c_f_toggle"):
-        c_f_toggle = "checked"
-    else:
-        c_f_toggle = "unchecked"
-
-    if request.form.get("font_toggle"):
-        font_toggle = "checked"
-    else:
-        font_toggle = "unchecked"
-
-    if request.form.get("mystery_toggle"):
-        mystery_toggle = "checked"
-    else:
-        mystery_toggle = "unchecked"
-
-    if request.form.get("server_time_toggle"):
-        server_time_toggle = "checked"
-    else:
-        server_time_toggle = "unchecked"
-
-    if request.form.get("speed_test_toggle"):
-        speed_test_toggle = "checked"
-    else:
-        speed_test_toggle = "unchecked"
-
-    file = open(r".checkbox_states.txt", 'w')
-    file.write(numbers_state + "\n" + services_state + "\n" + commands_toggle + "\n" + disk_toggle + "\n" + c_f_toggle + "\n" + font_toggle + "\n" + mystery_toggle + "\n" + server_time_toggle + "\n" + speed_test_toggle)
+    file_contents = {}
+    for value in checkboxes:
+        file_contents[value] = "checked" if value in request.form else "unchecked"
+    file = open(r".checkbox_states.json", 'w')
+    file.write(json.dumps(file_contents, indent=len(file_contents)))
     file.close()
     return '', 204
 
@@ -348,4 +320,4 @@ if len(ip_addresses) >= 1:
 print("\033[0m")
 sys.stdout.flush()
 
-waitress.serve(app, host="0.0.0.0", port=port)
+waitress.serve(app, host=listen_address, port=port)
