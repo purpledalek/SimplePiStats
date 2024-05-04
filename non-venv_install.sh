@@ -29,6 +29,8 @@ sudo apt-get install speedtest > /dev/null 2>&1
 
 # Update service file with correct paths
 echo Setting up file structure...
+rm SimplePiStats.service
+mv non-venv_SimplePiStats.service SimplePiStats.service
 sed -i "s|WorkingDirectory=.*|WorkingDirectory=$(pwd)|; s|User=.*|User=$(whoami)|" SimplePiStats.service
 
 # Remove existing service file and directory
@@ -54,7 +56,7 @@ fi
 
 # Remove unnecessary local files
 echo Cleaning up...
-rm update.sh install.sh non-venv_install.sh readme.md SimplePiStats.service requirements.txt .gitignore
+rm update.sh install.sh non-venv_install.sh readme.md requirements.txt .gitignore
 rm -rf .git
 
 # Enable the service
