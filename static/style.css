@@ -143,6 +143,7 @@ a {
 
 #extDisks {
     width: fit-content;
+    min-width: 250px;
 }
 
 .driveDiv {
