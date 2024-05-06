@@ -362,7 +362,7 @@
         hideElementOnLoad(server_time_toggle, [server_time_element])
         hideElementOnLoad(speed_test_toggle, [speed_test_element])
 
-        if (speed_test_element.style.display != "none") {
+        if (!speed_test_element.classList.contains("hidden")) {
             fetch('/speed_test', {
                 method: 'POST',
                 headers: {
