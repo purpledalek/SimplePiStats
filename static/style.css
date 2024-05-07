@@ -1,7 +1,6 @@
 :root {
     font-family: verdana, roboto;
     padding: 10px;
-    color: white;
 }
 
 .centered_div {
@@ -15,6 +14,7 @@
 }
 
 .data {
+    color: white;
     width: 25%;
     margin: 20px;
     padding: 10px;
