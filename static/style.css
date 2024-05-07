@@ -47,6 +47,7 @@
 
 #driveGrid {
     display: flex;
+    justify-content: center;
 }
 
 .bootTime {
