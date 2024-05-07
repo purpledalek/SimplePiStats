@@ -138,6 +138,7 @@ def create_command_buttons():
 @app.route('/')
 def index():
     # get output
+    hostname = subprocess.check_output(['hostname']).decode().strip()
     cpu_lookup = subprocess.Popen(["top", "-n", "1", "-b"], stdout=subprocess.PIPE, text=True)
     time.sleep(.1)
     for line in cpu_lookup.communicate()[0].split("\n"):
@@ -195,7 +196,7 @@ def index():
     else:
         temp = "3"
     command_buttons = create_command_buttons()
-    return render_template("SimplePiStats.html", cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), time_checkbox_state=file_contents.get(checkboxes[0]), speed_checkbox_state=file_contents.get(checkboxes[1]), numbers_checkbox_state=file_contents.get(checkboxes[2]), disk_checkbox_state=file_contents.get(checkboxes[3]), services_checkbox_state=file_contents.get(checkboxes[4]), commands_checkbox_state=file_contents.get(checkboxes[5]), fahrenheit_checkbox_state=file_contents.get(checkboxes[6]), font_checkbox_state=file_contents.get(checkboxes[7]), mystery_checkbox_state=file_contents.get(checkboxes[8]), command_buttons=" ".join(command_buttons), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"), addressConfig=listen_address, custom_css=conf_get("custom_css"))
+    return render_template("SimplePiStats.html", hostname=hostname, cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), time_checkbox_state=file_contents.get(checkboxes[0]), speed_checkbox_state=file_contents.get(checkboxes[1]), numbers_checkbox_state=file_contents.get(checkboxes[2]), disk_checkbox_state=file_contents.get(checkboxes[3]), services_checkbox_state=file_contents.get(checkboxes[4]), commands_checkbox_state=file_contents.get(checkboxes[5]), fahrenheit_checkbox_state=file_contents.get(checkboxes[6]), font_checkbox_state=file_contents.get(checkboxes[7]), mystery_checkbox_state=file_contents.get(checkboxes[8]), command_buttons=" ".join(command_buttons), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"), addressConfig=listen_address, custom_css=conf_get("custom_css"))
 
 @app.route('/disk_usage', methods=['POST'])
 def disk_usage():
@@ -312,11 +313,13 @@ def restart_system():
     threading.Thread(target=reboot).start()
     return jsonify({"status": "System restarting..."})
 
-ip_addresses = subprocess.check_output(['hostname', '-I']).decode().strip().split(" ")
-del ip_addresses[-1]
-print(f"\033[0;32mSimplePiStats is currently running on http://{ip_addresses.pop(0)}:{port}")
-if len(ip_addresses) >= 1:
-    print(f"it can also be reached on http://{ip_addresses.pop(0)}:{port}")
+if conf_get("address") == "0.0.0.0":
+    ip_addresses = subprocess.check_output(['hostname', '-I']).decode().strip().split(" ")
+    print(f"\033[0;32mSimplePiStats is currently running on http://{ip_addresses.pop(0)}:{port}")
+    if len(ip_addresses) >= 1:
+        print(f"it can also be reached on http://{ip_addresses.pop(0)}:{port}")
+else:
+    print(f"\033[0;32mSimplePiStats is currently running on http://{conf_get('address')}:{port}")
 print("\033[0m")
 sys.stdout.flush()
 
