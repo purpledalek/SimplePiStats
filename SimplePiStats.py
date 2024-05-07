@@ -313,13 +313,13 @@ def restart_system():
     threading.Thread(target=reboot).start()
     return jsonify({"status": "System restarting..."})
 
-if conf_get("address") == "0.0.0.0":
+if listen_address == "0.0.0.0":
     ip_addresses = subprocess.check_output(['hostname', '-I']).decode().strip().split(" ")
     print(f"\033[0;32mSimplePiStats is currently running on http://{ip_addresses.pop(0)}:{port}")
     if len(ip_addresses) >= 1:
         print(f"it can also be reached on http://{ip_addresses.pop(0)}:{port}")
 else:
-    print(f"\033[0;32mSimplePiStats is currently running on http://{conf_get('address')}:{port}")
+    print(f"\033[0;32mSimplePiStats is currently running on http://{listen_address}:{port}")
 print("\033[0m")
 sys.stdout.flush()
 
