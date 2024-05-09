@@ -52,10 +52,10 @@ def service_check(service_):
 
     if "--no_stop" in service_.lower():
         stop = False
-        service_ = service_.lower().replace(" --no_stop", "")
+        service_ = service_.replace(" --no_stop", "")
     if "--no_restart" in service_.lower():
         restart = False
-        service_ = service_.lower().replace(" --no_restart", "")
+        service_ = service_.replace(" --no_restart", "")
     if "/" in service_:
         service = service_.split("/")[0]
         output += f"<div class=\"service innerContainer\" id=\"{service}\"> <div class=\"text\">"
