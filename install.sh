@@ -6,8 +6,8 @@ if [ -s SimplePiStats/config.ini ]; then
   sudo mv SimplePiStats/config.ini /
 fi
 
-if [ -s SimplePiStats/checkbox_states.json ]; then
-  sudo mv SimplePiStats/checkbox_states.json /
+if [ -s SimplePiStats/.checkbox_states.json ]; then
+  sudo mv SimplePiStats/.checkbox_states.json /
 fi
 
 if [ -d SimplePiStats/service_icons ]; then
