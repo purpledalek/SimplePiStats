@@ -6,6 +6,10 @@ if [ -s SimplePiStats/config.ini ]; then
   sudo mv SimplePiStats/config.ini /
 fi
 
+if [ -s SimplePiStats/checkbox_states.json ]; then
+  sudo mv SimplePiStats/checkbox_states.json /
+fi
+
 if [ -d SimplePiStats/service_icons ]; then
   sudo mv SimplePiStats/service_icons /
 fi
@@ -50,6 +54,11 @@ sudo cp SimplePiStats.service /lib/systemd/system/SimplePiStats.service
 if [ -d /service_icons ]; then
   rm -rf service_icons
   sudo mv /service_icons .
+fi
+
+if [ -f /.checkbox_states.json ]; then
+  rm -rf .checkbox_states.json
+  sudo mv /.checkbox_states.json .
 fi
 
 if [ -f /config.ini ]; then
