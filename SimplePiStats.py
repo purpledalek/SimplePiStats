@@ -57,29 +57,23 @@ def service_check(service_):
         restart = False
         service_ = service_.replace(" --no_restart", "")
     if "/" in service_:
-        service = service_.split("/")[0]
-        output += f"<div class=\"service innerContainer\" id=\"{service}\"> <div class=\"text\">"
-        port = service_.split("/")[1]
-        desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
-        if "-" in desc:
-            desc = service.title()
-        output += f"<a class=\"service_stats\" id=\"{port}\" target=\"_blank\">{desc}</a>"
+        service, port = service_.split("/")
+        output_template = f"<a class=\"service_stats\" id=\"port\" target=\"_blank\">desc</a>"
     else:
-        service = service_
-        output += f"<div class=\"service innerContainer\" id=\"{service}\"> <div class=\"text\">"
-        desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
-        if "-" in desc:
-            desc = service.title()
-        output += "<p class=\"service_stats\">" + desc + "</p>"
+        service, port = service_, ""
+        output_template = "<p class=\"service_stats\">desc</p>"
     status_check = subprocess.run(["systemctl", "is-active", service], stdout=subprocess.PIPE, text=True).stdout.strip()
+    output += f"<div class=\"service innerContainer\" id=\"{service}\"> <div class=\"text\">"
+    desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
+    if "-" in desc:
+        desc = service.title()
     for file in os.listdir(r"service_icons"):
         if service.lower() == file.split(".")[0].lower():
             if status_check == "inactive":
                 output += f"<img class=\"service_icon bw\" src=\"service_icons/{file}\">"
             else:
                 output += f"<img class=\"service_icon\" src=\"service_icons/{file}\">"
-        else:
-            pass
+    output += output_template.replace("desc", desc).replace("port", port)
     if status_check == "active":
         service_boot_time = subprocess.run(["systemctl", "show", "--property=ActiveEnterTimestamp", service], stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")
         reboot_duration = datetime.datetime.now().replace(tzinfo=pytz.utc, microsecond=0) - dateparser.parse(service_boot_time).replace(tzinfo=pytz.utc, microsecond=0)
@@ -173,10 +167,10 @@ def index():
                 group_title = service.pop(0).title()
                 for file in os.listdir(r"service_icons"):
                     if group_title.lower() == file.split(".")[0].lower():
-                        group_title = f"<img class=\"group_title_icon\" src=\"service_icons/{file}\">" + group_title
+                        group_title_image = f"<img class=\"group_title_icon\" src=\"service_icons/{file}\">"
                     else:
                         pass
-                services.append("<div style='margin-bottom: 20px;'><b>" + group_title + "</b></div>")
+                services.append(group_title_image + "<h3 style=\"vertical-align: middle; display: inline;\">" + group_title + "</h3>")
                 for serv in service:
                     services.append(service_check(serv))
             else:
