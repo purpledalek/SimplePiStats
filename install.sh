@@ -52,8 +52,8 @@ sudo cp SimplePiStats.service /lib/systemd/system/SimplePiStats.service
 
 
 if [ -d /service_icons ]; then
-  rm -rf service_icons
-  sudo mv /service_icons/* ./service_icons
+  sudo mv /service_icons/* ./service_icons/
+  sudo rmdir /service_icons
 fi
 
 if [ -f /.checkbox_states.json ]; then
