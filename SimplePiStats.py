@@ -166,12 +166,13 @@ def index():
             if isinstance(service, list):
                 services.append("<div class=\"innerContainer service\">")
                 group_title = service.pop(0).title()
-                for file in os.listdir(r"service_icons"):
-                    if group_title.lower() == file.split(".")[0].lower():
-                        group_title_image = f"<img class=\"group_title_icon\" src=\"service_icons/{file}\">"
-                    else:
-                        pass
-                services.append(group_title_image + "<h3 style=\"vertical-align: middle; display: inline;\">" + group_title + "</h3>")
+                service_icons = [icon.split(".")[0] for icon in os.listdir("service_icons")]
+                if group_title.lower() in service_icons:
+                    for file in os.listdir("service_icons"):
+                        if file.lower().split(".")[0] == group_title.lower():
+                            services.append(f"<img class=\"group_title_icon\" src=\"service_icons/{file}\"><h3 style=\"vertical-align: middle; display: inline;\">" + group_title + "</h3>")
+                else:
+                    services.append("<h3 style=\"vertical-align: middle; display: inline;\">" + group_title + "</h3>")
                 for serv in service:
                     services.append(service_check(serv))
                     if service.index(serv) == len(service) - 1:
