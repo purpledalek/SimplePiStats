@@ -35,7 +35,7 @@ if not os.path.exists(r"./config.ini"):
         "bg_color": '"#084e0a"',
         "commands": [],
         "drives": [],
-        "services": [],
+        "services": ["SimplePiStats"],
         "custom_css": '""'
     }
     with open("config.ini", "w") as config_file:
@@ -67,6 +67,8 @@ def service_check(service_):
     desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
     if "-" in desc:
         desc = service.title()
+    if service == "SimplePiStats":
+        output += "<img class=\"service_icon\" src=\"static/favicon.png\">"
     for file in os.listdir(r"service_icons"):
         if service.lower() == file.split(".")[0].lower():
             if status_check == "active":
