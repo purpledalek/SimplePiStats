@@ -316,8 +316,10 @@ def restart_system():
 if listen_address == "0.0.0.0":
     ip_addresses = subprocess.check_output(['hostname', '-I']).decode().strip().split(" ")
     print(f"\033[0;32mSimplePiStats is currently running on http://{ip_addresses.pop(0)}:{port}")
-    if len(ip_addresses) >= 1:
-        print(f"it can also be reached on http://{ip_addresses.pop(0)}:{port}")
+    for address in ip_addresses:
+        search = re.match(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", address)
+        if search:
+            print(f"it can also be reached on http://{address}:{port}")
 else:
     print(f"\033[0;32mSimplePiStats is currently running on http://{listen_address}:{port}")
 print("\033[0m")
