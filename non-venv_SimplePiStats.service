@@ -8,6 +8,7 @@ WorkingDirectory=/path/to/file
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
+RestartSec=60
 User=user
 
 [Install]
