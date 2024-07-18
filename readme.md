@@ -3,6 +3,9 @@ A simple UI designed for people running their Raspberry Pi as a server, and who 
 
 ## Please ensure you are using Raspbian Bookworm for the internet speed test to work
 
+## New features!
+- The ability to display Docker container information and control containers the same way as systemd services
+
 ## How to install/update
 Simply change directory (`cd`) into the directory where you want to store SimplePiStats, then run the following command:
 
@@ -65,5 +68,4 @@ Please note: images may be unstable on iPhone, refreshing is the only known fix 
 You can add a custom CSS file by putting it in the `static` folder, then adding the filename to the config. For example if you have a CSS file called myCustomStyle.css, you can put that in the `static` folder and then add "myCustomStyle.css" to the custom_css line of the config. Any changes made to elements in your custom css file will overwrite the default style for that element.
 
 ## Possible features
-- The ability to display Docker container information
 - More icons for popular services
