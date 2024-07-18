@@ -268,7 +268,7 @@ a {
         top: 8%;
     }
     #extDisks {
-        width: inherit;
+        width: inherit !important;
     }
     .emoji {
         margin-top: -35px;
