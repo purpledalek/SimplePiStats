@@ -57,7 +57,7 @@ def check_docker():
     docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{ .Names }}", "Status":"{{ .Status }}"}'], stdout=subprocess.PIPE, text=True).stdout.strip()
     output = ""
     if docker_ps == "":
-        output = "<div class='innerContainer'><div class='text'>No Docker containers found. Are you sure any are running?</div><div>"
+        output = "<div class='innerContainer'><div class='text'>No Docker containers found. Are you sure any are running? If you don't want to see this section you can hide it using settings</div><div>"
     else:
         for i in docker_ps.split("\n"):
             container_data = json.loads(i)
