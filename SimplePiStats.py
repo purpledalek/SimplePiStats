@@ -56,21 +56,24 @@ def pre_append(command, lis):
 def check_docker():
     docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{ .Names }}", "Status":"{{ .Status }}"}'], stdout=subprocess.PIPE, text=True).stdout.strip()
     output = ""
-    for i in docker_ps.split("\n"):
-        container_data = json.loads(i)
-        name = container_data.get("Names")
-        output += f"<div id='{name}' class='innerContainer'><div class='text'>"
-        output += name
-        status = container_data.get("Status").replace("Up", "Container last restarted") + " ago"
-        if status.startswith("Exited"):
-            status_icon = "<p id=\"status\"> 🔴 </p>"
-            status = "Container last restarted N/A"
-        else:
-            status_icon = "<p id=\"status\"> 🟢 </p>"
-        output += f"{status_icon}</div>"
-        output += f"<p id='containerReboot'>{status}</p>"
-        output += f"<div class='buttons'><button onclick='handle_button_action(\"stop/{name}\", \"docker\")'>Stop</button><button onclick='handle_button_action(\"restart/{name}\", \"docker\")'>Restart</button></div>"
-        output += "</div>"
+    if docker_ps == "":
+        output = "<div class='innerContainer'><div class='text'>No Docker containers found. Are you sure any are running?</div><div>"
+    else:
+        for i in docker_ps.split("\n"):
+            container_data = json.loads(i)
+            name = container_data.get("Names")
+            output += f"<div id='{name}' class='innerContainer'><div class='text'>"
+            output += name
+            status = container_data.get("Status").replace("Up", "Container last restarted") + " ago"
+            if status.startswith("Exited"):
+                status_icon = "<p id=\"status\"> 🔴 </p>"
+                status = "Container last restarted N/A"
+            else:
+                status_icon = "<p id=\"status\"> 🟢 </p>"
+            output += f"{status_icon}</div>"
+            output += f"<p id='containerReboot'>{status}</p>"
+            output += f"<div class='buttons'><button onclick='handle_button_action(\"stop/{name}\", \"docker\")'>Stop</button><button onclick='handle_button_action(\"restart/{name}\", \"docker\")'>Restart</button></div>"
+            output += "</div>"
     return output
 
 def service_check(service_):
