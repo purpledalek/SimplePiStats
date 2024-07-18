@@ -19,13 +19,18 @@
     margin: 20px;
     padding: 10px;
     border-radius: 25px;
-    text-align: center;
     height: fit-content;
     display: block;
     h1 {
         font-size: 2vw;
         margin-top: 20px;
     }
+}
+
+.dataHeadingImage {
+    vertical-align: middle;
+    margin-left: 20px;
+    width: 128px;
 }
 
 .heading {
@@ -85,11 +90,12 @@ button {
     padding: 20px;
 }
 
-#services {
+#services, #docker_containers {
     min-width: 464.8px;
     p {
         margin: 0;
         display: inline;
+        text-align: left;
     }
 }
 
@@ -150,7 +156,6 @@ a {
 }
 
 #extDisks {
-    width: fit-content;
     min-width: 250px;
     text-align: center;
 }
@@ -249,7 +254,7 @@ a {
         padding-left: 5px;
         padding-right: 5px;
     }
-    #services {
+    #services, #docker_containers {
         width: 85%;
         min-width: initial;
     }

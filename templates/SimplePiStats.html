@@ -50,6 +50,12 @@
                 Please wait
             </p>
         </div>
+        <div class="speedTestData">
+            <p class="speedTestTitle"><b>Server location</b></p>
+            <p id="ping" class="innerContainer">
+                Please wait
+            </p>
+        </div>
     </div>
     <div class="centered_div">
         <div class="data" id="rebootClock">
@@ -91,8 +97,8 @@
             {{ command_buttons|safe }}
             <div class="innerContainer" id="commandReturn" style="font-size: 20px; margin-bottom: 10px; min-height: 30px; overflow: hidden;">> Command output</div>
         </div>
-        <div class="data" id="services" style="height: fit-content; text-align: left;">
-            <h2 class="heading">Service statuses</h2>
+        <div class="data" id="services" style="height: fit-content;">
+            <h2 class="heading">Systemd services<img class="dataHeadingImage" src="static/systemd.png"></h2>
             {{ services|safe }}
         </div>
         <div class="data" id="extDisks">
@@ -100,6 +106,12 @@
             <div id="driveGrid">
                 Please wait
             </div>
+        </div>
+    </div>
+    <div class="centered_div">
+        <div class="data" id="docker_containers">
+            <h2 class="heading" id="docker_heading">Docker containers<img class="dataHeadingImage" src="static/docker.png"></h2>
+            {{ docker_containers|safe }}
         </div>
     </div>
 
@@ -130,6 +142,10 @@
                     <div class="setting-block">
                         <input type="checkbox" id="commandsToggle" class="toggle_switch" style="display: inline-block" name="commandsToggle" {{ commands_checkbox_state }}>
                         <label for="commands_toggle" class="toggle_switch" style="padding-right: 10px">Hide commands section</label>
+                    </div>
+                    <div class="setting-block">
+                        <input type="checkbox" id="dockerToggle" class="toggle_switch" style="display: inline-block" name="dockerToggle" {{ docker_checkbox_state }}>
+                        <label for="dockerToggle" class="toggle_switch" style="padding-right: 10px">Hide Docker section</label>
                     </div>
                     <div class="setting-block">
                         <input type="checkbox" id="c_f_toggle" class="toggle_switch" onclick="Fahrenheit()" style="display: inline-block" name="cfToggle" {{ fahrenheit_checkbox_state }}>
@@ -198,29 +214,74 @@
         event.preventDefault()
         document.getElementById('edit_config').style.display = 'none'
     }
-    function handle_button_action(buttonId) {
-        fetch('/button_action', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                button_id: buttonId,
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById(data.service).querySelector('#status').innerText = data.status;
-            document.getElementById(data.service).querySelector("#serviceReboot").innerText = data.serviceReboot
-            if (data.status === " 🔴 ") {
-                document.getElementById(data.service).querySelector(".service_icon").classList.add("bw")
-            }
+    function update_systemd_service(data) {
+        serviceName = document.getElementById(data.service)
+        serviceName.querySelector('#status').innerText = data.status;
+        serviceName.querySelector("#serviceReboot").innerText = data.serviceReboot
+        for (child of serviceName.querySelector(".text").children) {
+            if (child.nodeName === "IMG") {
+                if (data.status === " 🔴 ") {
+                serviceName.querySelector(".service_icon").classList.add("bw")
+                }
             else {
-                document.getElementById(data.service).querySelector(".service_icon").classList.remove("bw")
+                serviceName.querySelector(".service_icon").classList.remove("bw")
+                }
             }
+        }
+    }
+    function handle_button_action(buttonId, type) {
+        if (type.split("/")[0] === "systemd --remote") {
+            fetch('/systemd_button_action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    button_id: buttonId,
+                    type: type.split("/")[0],
+                    ip: type.split("/")[1]
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                update_systemd_service(data)
         })
     }
-
+        else if (type === "systemd") {
+            fetch('/systemd_button_action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    button_id: buttonId,
+                    type: type
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                update_systemd_service(data)
+            })
+        }
+        if (type === "docker") {
+            fetch('/docker_button_action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    button_id: buttonId,
+                    type: type
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(data.container).querySelector('#status').innerText = data.status;
+                document.getElementById(data.container).querySelector("#containerReboot").innerText = data.containerReboot
+            })
+        }
+    }
+    
     function runCommand(commandText) {
         fetch('/run_command', {
             method: 'POST',
@@ -277,7 +338,7 @@
     // Yes, these are out here for a reason, DON'T move them, you WILL break things!!
     const dataBackroundColor = document.getElementById("divBgColor");
     const speed_test_element = document.getElementsByClassName("speedTest")[0]
-    
+
     document.addEventListener("DOMContentLoaded", function() {
 
         //elements
@@ -288,6 +349,7 @@
         const mystery_element = document.getElementById("runCommandHeading");
         const disk_element = document.getElementById("extDisks");
         const server_time_element = document.getElementsByClassName("serverTimeBlock")[0];
+        const docker_containers_element = document.getElementById("docker_containers");
 
         //toggles
         const temp_toggle = document.getElementById('temp_toggle');
@@ -299,6 +361,7 @@
         const disk_toggle = document.getElementById("diskToggle");
         const server_time_toggle = document.getElementById("serverTimeToggle");
         const speed_test_toggle = document.getElementById("speedToggle")
+        const docker_toggle = document.getElementById("dockerToggle")
 
         function hideElement(toggle, element, dispType) {
             for (var i = 0; i<element.length; i++) {
@@ -317,6 +380,7 @@
         hideElement(commands_toggle, [commands_element], ["block"])
         hideElement(server_time_toggle, [server_time_element], ["inline-block"])
         hideElement(speed_test_toggle, [speed_test_element], ["inline"])
+        hideElement(docker_toggle, [docker_containers_element], ["inline"])
         
         
         
@@ -362,6 +426,7 @@
         hideElementOnLoad(commands_toggle, [commands_element])
         hideElementOnLoad(server_time_toggle, [server_time_element])
         hideElementOnLoad(speed_test_toggle, [speed_test_element])
+        hideElementOnLoad(docker_toggle, [docker_containers_element])
 
         if (!speed_test_element.classList.contains("hidden")) {
             fetch('/speed_test', {
@@ -375,6 +440,7 @@
                 speed_test_element.querySelector('#ping').innerText = data.ping;
                 speed_test_element.querySelector('#upload').innerText = data.upload;
                 speed_test_element.querySelector('#download').innerText = data.download;
+                speed_test_element.querySelector('#location').innerText = data.location
             })
         }
         else {
@@ -390,13 +456,17 @@
                     'Content-Type': 'application/json',
                 },
             })
-            .then(response => response.text())
-            .then((text) => {
-                driveGrid.innerHTML = text;
+            .then(response => response.json())
+            .then(data => {
+                driveGrid.innerHTML = data.driveList;
+                noDrives = data.noDrives
+                if (noDrives === false) {
+                    disk_element.style.width = "fit-content"
+                }
             });
         }
         else {
-            for (child of speed_test_element.children) {
+            for (child of disk_element.children) {
                 child.children[1].innerText = "Please reload"
             }
         }

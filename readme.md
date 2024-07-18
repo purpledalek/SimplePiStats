@@ -1,7 +1,7 @@
 # SimplePiStats
 A simple UI designed for people running their Raspberry Pi as a server, and who quick and easy to read stats and control of their system.
 
-## Please ensure you are using Raspbian Bullseye for the internet speed test to work and that git is installed before running the install command
+## Please ensure you are using Raspbian Bookworm for the internet speed test to work
 
 ## How to install/update
 Simply change directory (`cd`) into the directory where you want to store SimplePiStats, then run the following command:
@@ -48,6 +48,13 @@ N.B. Editing the `config.ini` file in the command line will require a restart of
 For any of these sections, you denote a new command/drive/service by adding it as a new list item.
 
 *You can add "--no_stop" or "--no_restart" after a service name (or port if applicable) if you wish to not see the specified button. Adding "--no_stop --no_restart" will hide both buttons
+
+### Monitoring services on remote machines
+To monitor a service remotely, simply add the "-r" flag followed by the user and ip of the machine you want to get the stats off of.
+
+Example: [`service_name>[/Port_number] -r <remote_user>@<remote_ip>`]
+
+Note: this feature requires setting up a public/private key pair to be established between the machine running SimplePiStats and the remote machine(s) you want to get service stats from. For more info on that [go here](https://ionutbanu.medium.com/setting-up-key-pair-ssh-on-raspberry-pi-9822b20037a0).
 
 ## How to change the data background color
 You can either change the background color of the data boxes using the color picker in settings, or by editing the hex value in the `config.ini` file

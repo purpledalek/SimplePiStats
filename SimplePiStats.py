@@ -45,11 +45,38 @@ if not os.path.exists(r"./config.ini"):
 listen_address = conf_get("address")
 port = conf_get("port")
 
+def pre_append(command, lis):
+    if type(command) == tuple:
+        for i in reversed(command):
+            lis.insert(0, i)
+    else:
+        lis.insert(0, command)
+    return lis
+
+def check_docker():
+    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{ .Names }}", "Status":"{{ .Status }}"}'], stdout=subprocess.PIPE, text=True).stdout.strip()
+    output = ""
+    for i in docker_ps.split("\n"):
+        container_data = json.loads(i)
+        name = container_data.get("Names")
+        output += f"<div id='{name}' class='innerContainer'><div class='text'>"
+        output += name
+        status = container_data.get("Status").replace("Up", "Container last restarted") + " ago"
+        if status.startswith("Exited"):
+            status_icon = "<p id=\"status\"> 🔴 </p>"
+            status = "Container last restarted N/A"
+        else:
+            status_icon = "<p id=\"status\"> 🟢 </p>"
+        output += f"{status_icon}</div>"
+        output += f"<p id='containerReboot'>{status}</p>"
+        output += f"<div class='buttons'><button onclick='handle_button_action(\"stop/{name}\", \"docker\")'>Stop</button><button onclick='handle_button_action(\"restart/{name}\", \"docker\")'>Restart</button></div>"
+        output += "</div>"
+    return output
+
 def service_check(service_):
     output = ""
     stop = True
     restart = True
-
     if "--no_stop" in service_.lower():
         stop = False
         service_ = service_.replace(" --no_stop", "")
@@ -57,27 +84,39 @@ def service_check(service_):
         restart = False
         service_ = service_.replace(" --no_restart", "")
     if "/" in service_:
-        service, port = service_.split("/")
-        output_template = f"<a class=\"service_stats\" id=\"port\" target=\"_blank\">desc</a>"
+        service = service_.split("/")[0]
+        port = service_.split("/")[1].split(" ")[0]
+        output_template = f"<a class=\"service_stats\" id=\"port\" target=\"_blank\">desc</a><p class=\"service_stats\">remote</p>"
     else:
         service, port = service_, ""
-        output_template = "<p class=\"service_stats\">desc</p>"
-    status_check = subprocess.run(["systemctl", "is-active", service], stdout=subprocess.PIPE, text=True).stdout.strip()
+        output_template = "<p class=\"service_stats\">desc remote</p>"
+    if "-r" in service_:
+        remote_host = re.search(r".* -r (.*[0-9.])", service_)
+        remote =  f" – on {remote_host.group(1)}"
+        systemctl = "systemctl", "--host", remote_host.group(1)
+        desc = subprocess.run(pre_append(systemctl, ["show", "-p", "Description", service]), stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
+    else:
+        remote = ""
+        systemctl = "systemctl"
+        desc = subprocess.run(pre_append(systemctl, ["show", "-p", "Description", service]), stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
+    status_check = subprocess.run(pre_append(systemctl, ["is-active", service]), stdout=subprocess.PIPE, text=True).stdout.strip()
     output += f"<div class=\"service innerContainer\" id=\"{service}\"> <div class=\"text\">"
-    desc = subprocess.run(["systemctl", "show", "-p", "Description", service], stdout=subprocess.PIPE, text=True).stdout.replace("Description=", "")
     if "-" in desc:
         desc = service.title()
     if service == "SimplePiStats":
-        output += "<img class=\"service_icon\" src=\"static/favicon.png\">"
+        if status_check == "active":
+            output += "<img class=\"service_icon\" src=\"static/favicon.png\">"
+        else:
+            output += "<img class=\"service_icon bw\" src=\"static/favicon.png\">"
     for file in os.listdir(r"service_icons"):
         if service.lower() == file.split(".")[0].lower():
             if status_check == "active":
                 output += f"<img class=\"service_icon\" src=\"service_icons/{file}\">"
             else:
                 output += f"<img class=\"service_icon bw\" src=\"service_icons/{file}\">"
-    output += output_template.replace("desc", desc).replace("port", port)
+    output += output_template.replace("desc", desc).replace("port", port).replace("remote", remote)
     if status_check == "active":
-        service_boot_time = subprocess.run(["systemctl", "show", "--property=ActiveEnterTimestamp", service], stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")
+        service_boot_time = subprocess.run(pre_append(systemctl, ["show", "--property=ActiveEnterTimestamp", service]), stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")
         reboot_duration = datetime.datetime.now().replace(tzinfo=pytz.utc, microsecond=0) - dateparser.parse(service_boot_time).replace(tzinfo=pytz.utc, microsecond=0)
         if reboot_duration.seconds < 60:
             reboot_duration = "less than a minute ago"
@@ -89,9 +128,15 @@ def service_check(service_):
     if stop == True or restart == True:
         output += f"<div class=\"buttons\">"
         if stop == True:
-            output += f"<button onclick=\"handle_button_action('stop/{service}')\" class=\"button\"id=\"stop\">Stop</button>"
+            if "-r" in service_:
+                output += f"<button onclick=\"handle_button_action('stop/{service}', 'systemd --remote/{remote_host.group(1)}' )\" class=\"button\"id=\"stop\">Stop</button>"
+            else:
+                output += f"<button onclick=\"handle_button_action('stop/{service}', 'systemd')\" class=\"button\"id=\"stop\">Stop</button>"
         if restart == True:
-            output += f"<button onclick=\"restart_confirm('{service}'); handle_button_action('restart/{service}')\"class=\"button\" id=\"restart\">Restart</button>"
+            if "-r" in service_:
+                output += f"<button onclick=\"restart_confirm('{service}'); handle_button_action('restart/{service}', 'systemd --remote/{remote_host.group(1)}')\"class=\"button\" id=\"restart\">Restart</button>"
+            else:
+                output += f"<button onclick=\"restart_confirm('{service}'); handle_button_action('restart/{service}', 'systemd')\"class=\"button\" id=\"restart\">Restart</button>"
         output += "</div>"
     output += "</div>"
     return output
@@ -99,18 +144,23 @@ def service_check(service_):
 
 @app.route("/speed_test", methods=['POST'])
 def speed_test():
-    response = subprocess.Popen('/usr/bin/speedtest --accept-license --accept-gdpr', shell=True, stdout=subprocess.PIPE).stdout.read().decode('utf-8')
-    ping = re.search('Latency:\s+(.*?s)', response, re.MULTILINE)
+    response = subprocess.Popen(['/usr/bin/speedtest'], shell=True, stdout=subprocess.PIPE).stdout.read().decode('utf-8')
+    ping = re.search(': (.*?ms)', response, re.MULTILINE)
     download = re.search('Download:\s+(.*?s)', response, re.MULTILINE)
     upload = re.search('Upload:\s+(.*?s)', response, re.MULTILINE)
-
-    ping = ping.group(1)
+    location = re.search('Hosted by .*\[(.*)]', response, re.MULTILINE)
+    try:
+        ping = ping.group(1)
+    except:
+        ping = re.search('Latency:\s+(.*?s)', response, re.MULTILINE)
+        ping = ping.group(1)
     download = download.group(1)
     upload = upload.group(1)
+    location = location.group(1)
 
-    return jsonify({"ping": ping, "download": download, "upload": upload})
+    return jsonify({"ping": ping, "download": download, "upload": upload, "location": location})
 
-checkboxes = ["serverTimeToggle", "speedTestToggle", "numbersToggle", "diskToggle", "servicesToggle", "commandsToggle", "cfToggle", "fontToggle", "mysteryToggle"]
+checkboxes = ["serverTimeToggle", "speedTestToggle", "numbersToggle", "diskToggle", "servicesToggle", "commandsToggle", "dockerToggle", "cfToggle", "fontToggle", "mysteryToggle"]
 
 if not os.path.exists(r".checkbox_states.json"):
     with open(r".checkbox_states.json", 'w') as file:
@@ -118,7 +168,17 @@ if not os.path.exists(r".checkbox_states.json"):
         for box in checkboxes:
             init_dict[box] = "unchecked"
         file.write(json.dumps(init_dict, indent=len(init_dict)))
-        file.close()
+else:
+    new_install = False
+    with open(r".checkbox_states.json", 'r') as file:
+        states = json.load(file)
+        for box in checkboxes:
+            if box not in states.keys():
+                new_install = True
+                states[box] = "unchecked"
+    if new_install == True:
+        with open(r".checkbox_states.json", 'w') as file:
+            file.write(json.dumps(states, indent=len(states)))
 
 def create_command_buttons():
     buttons = []
@@ -149,7 +209,6 @@ def index():
 
     with open(r".checkbox_states.json", "r") as file:
         file_contents = json.load(file)
-        file.close()
 
     # 0 - 40 :]
     # 41 - 74 :|
@@ -196,12 +255,15 @@ def index():
     else:
         temp = "3"
     command_buttons = create_command_buttons()
-    return render_template("SimplePiStats.html", hostname=hostname, cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), time_checkbox_state=file_contents.get(checkboxes[0]), speed_checkbox_state=file_contents.get(checkboxes[1]), numbers_checkbox_state=file_contents.get(checkboxes[2]), disk_checkbox_state=file_contents.get(checkboxes[3]), services_checkbox_state=file_contents.get(checkboxes[4]), commands_checkbox_state=file_contents.get(checkboxes[5]), fahrenheit_checkbox_state=file_contents.get(checkboxes[6]), font_checkbox_state=file_contents.get(checkboxes[7]), mystery_checkbox_state=file_contents.get(checkboxes[8]), command_buttons=" ".join(command_buttons), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"), addressConfig=listen_address, custom_css=conf_get("custom_css"))
+    docker_containers = check_docker()
+    return render_template("SimplePiStats.html", hostname=hostname, cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), time_checkbox_state=file_contents.get(checkboxes[0]), speed_checkbox_state=file_contents.get(checkboxes[1]), numbers_checkbox_state=file_contents.get(checkboxes[2]), disk_checkbox_state=file_contents.get(checkboxes[3]), services_checkbox_state=file_contents.get(checkboxes[4]), commands_checkbox_state=file_contents.get(checkboxes[5]), fahrenheit_checkbox_state=file_contents.get(checkboxes[6]), font_checkbox_state=file_contents.get(checkboxes[7]), mystery_checkbox_state=file_contents.get(checkboxes[8]), command_buttons=" ".join(command_buttons), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"), addressConfig=listen_address, custom_css=conf_get("custom_css"), docker_containers=docker_containers)
 
 @app.route('/disk_usage', methods=['POST'])
 def disk_usage():
     drives_text_file = conf_get("drives")
+    no_drives = False
     if drives_text_file == []:
+        no_drives = True
         ext_drives = ["<p>No external drive paths found. Please add paths in settings > Edit config to use this feature, or you can hide it using settings. See the <a href=\"https://github.com/purpledalek/SimplePiStats/blob/main/readme.md#editing-config-file\" target=\"_blank\">readme</a> for more info.</p>"]
     else:
         paths = []
@@ -239,7 +301,7 @@ def disk_usage():
                     ext_drives.append(f"<p class=\"driveData\">{used}B used</p>")
             ext_drives.append("</div>")
             count = count + 1
-    return " ".join(ext_drives)
+    return jsonify({"driveList": " ".join(ext_drives), "noDrives": no_drives})
 
 @app.route('/save_color', methods=['POST'])
 def save_color():
@@ -266,14 +328,23 @@ def edit_config():
         changed = False
     return '', 204
 
-@app.route('/button_action', methods=['POST'])
-def button_action():
+@app.route('/systemd_button_action', methods=['POST'])
+def systemd_button_action():
     button_action_ = str(request.json['button_id']).split("/")
-    subprocess.run(["sudo", "systemctl", button_action_[0], button_action_[1]])
-    time.sleep(0.5)
-    status_check = subprocess.run(["systemctl", "is-active", button_action_[1]], stdout=subprocess.PIPE, text=True).stdout.strip()
+    command = str(request.json['type']).split("/")[0]
+    if command == "systemd --remote":
+        ip = str(request.json['ip'])
+        subprocess.run(["ssh", ip, "sudo", "systemctl", button_action_[0], button_action_[1]])
+    else:
+        subprocess.run(["sudo", "systemctl", button_action_[0], button_action_[1]])
+    time.sleep(3)
+    if command == "systemd":
+        systemctl = "systemctl"
+    elif command == "systemd --remote":
+        systemctl = "systemctl", "--host", ip
+    status_check = subprocess.run(pre_append(systemctl, ["is-active", button_action_[1]]), stdout=subprocess.PIPE, text=True).stdout.strip()
     if status_check == "active":
-        service_boot_time = subprocess.run(["systemctl", "show", "--property=ActiveEnterTimestamp", button_action_[1]], stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")
+        service_boot_time = subprocess.run(pre_append(systemctl, ["show", "--property=ActiveEnterTimestamp", button_action_[1]]), stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")
         status_message = f" 🟢 "
         reboot_duration = datetime.datetime.now().replace(tzinfo=pytz.utc, microsecond=0) - dateparser.parse(service_boot_time).replace(tzinfo=pytz.utc, microsecond=0)
         if reboot_duration.seconds < 60:
@@ -285,6 +356,25 @@ def button_action():
         status_message = " 🔴 "
         service_reboot = "Service last restarted N/A"
     return jsonify({"service": button_action_[1], "status": status_message, "serviceReboot": service_reboot})
+
+@app.route('/docker_button_action', methods=['POST'])
+def docker_button_action():
+    button_action_ = str(request.json['button_id']).split("/")
+    name = button_action_[1]
+    subprocess.run(["sudo", "docker", button_action_[0], name], stdout=subprocess.DEVNULL)
+    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{ .Names }}", "Status":"{{ .Status }}"}'], stdout=subprocess.PIPE, text=True).stdout.strip()
+    for i in docker_ps.split("\n"):
+        container_data = json.loads(i)
+        if name == container_data.get("Names"):
+            status = container_data.get("Status")
+            if status.startswith("Exited"):
+                status_message = " 🔴 "
+                status = "Container last restarted N/A"
+            else:
+                status_message = " 🟢 "
+                status = status.replace("Up", "Container last restarted") + " ago"
+            
+    return jsonify({"container": button_action_[1], "status": status_message, "containerReboot": status})
 
 
 @app.route("/update_settings", methods=["POST"])
