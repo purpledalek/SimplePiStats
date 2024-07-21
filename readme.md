@@ -65,7 +65,10 @@ You can either change the background color of the data boxes using the color pic
 Please note: images may be unstable on iPhone, refreshing is the only known fix for this issue
 
 ## Adding custom CSS
-You can add a custom CSS file by putting it in the `static` folder, then adding the filename to the config. For example if you have a CSS file called myCustomStyle.css, you can put that in the `static` folder and then add "myCustomStyle.css" to the custom_css line of the config. Any changes made to elements in your custom css file will overwrite the default style for that element.
+You can add a custom CSS file by placing it in the `static` folder, then adding the filename to the config. For example if you have a CSS file called myCustomStyle.css, you can put that in the `static` folder and then add "myCustomStyle.css" to the custom_css line of the config. Any changes made to elements in your custom css file will overwrite the default style for that element.
+
+## Adding custom JavaScript
+You can add custom JavaScript by placing as many `.js` files into `static/custom_js`. Files will be loaded in alphabetical order, below all other JS on the page, just above the closing script tag. This can be used for many things, such as creating buttons that trigger alert or confirmation boxes, which then can be used to trigger other events.
 
 ## Possible features
 - More icons for popular services

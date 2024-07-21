@@ -281,9 +281,11 @@
             })
         }
     }
-    
-    function runCommand(commandText) {
-        fetch('/run_command', {
+
+    // the value of displayResult (defaults to true) decides whether the output of this function is displayed in the "command output" box on the webpage when the button is pressed
+    // similarly, the value of returnResult (defaults to false) decides whether the output is returned to the function that called it for use with creating buttons via the custom_js folder
+    function runCommand(commandText, displayResult = true, returnResult = false) {
+        return fetch('/run_command', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -294,7 +296,12 @@
         })
         .then(response => response.text())
         .then(data => {
-            document.getElementById("commandReturn").innerText = "> Command output\n\n" + data.substr(0, 1000);
+            if (displayResult === true) {
+                document.getElementById("commandReturn").innerText = "> Command output\n\n" + data.substr(0, 1000);
+            }
+            if (returnResult === true) {
+                return data
+            }
         })
     }
 
@@ -631,6 +638,8 @@
     function restart_confirm(service) {
         document.getElementById(service).children[0].querySelector("#status").innerHTML = " 🟠 ";
     }
+
+    {{ custom_js|safe }}
 </script>
 </body>
 </html>
