@@ -10,6 +10,10 @@ if [ -d SimplePiStats/service_icons ]; then
   sudo mv SimplePiStats/service_icons /
 fi
 
+if [ -d SimplePiStats/static/custom_js ]; then
+  sudo mv SimplePiStats/static/custom_js /
+fi
+
 # Remove previous installation
 if [ -d SimplePiStats ]; then
   rm -rf SimplePiStats
@@ -43,10 +47,14 @@ fi
 # Copying the updated service file
 sudo cp SimplePiStats.service /lib/systemd/system/SimplePiStats.service
 
-
 if [ -d /service_icons ]; then
   sudo mv /service_icons/* ./service_icons/
   sudo rmdir /service_icons
+fi
+
+if [ -d /custom_js ]; then
+  sudo mv /custom_js/* ./static/custom_js/
+  sudo rmdir /custom_js
 fi
 
 if [ -f /config.ini ]; then
