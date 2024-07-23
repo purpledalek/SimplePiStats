@@ -194,7 +194,7 @@ def create_command_buttons():
     else:
         for line in commands:
             spl = line.split(":")
-            buttons.append(f"<button onclick='runCommand(\"{spl[1].strip()}\")' style=\"margin: 10px\">{spl[0].strip()}</button>")
+            buttons.append(f"<button onclick='runCommand(\"{spl[1].strip()}\")'>{spl[0].strip()}</button>")
     return buttons
 
 @app.route('/')

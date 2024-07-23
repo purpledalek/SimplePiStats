@@ -50,6 +50,10 @@
     text-align: center;
 }
 
+#runCommand > button {
+    margin: 10px
+}
+
 #driveGrid {
     display: flex;
     justify-content: center;
