@@ -59,6 +59,14 @@ Example: [`service_name>[/Port_number] -r <remote_user>@<remote_ip>`]
 
 Note: this feature requires setting up a public/private key pair to be established between the machine running SimplePiStats and the remote machine(s) you want to get service stats from. For more info on that [go here](https://ionutbanu.medium.com/setting-up-key-pair-ssh-on-raspberry-pi-9822b20037a0).
 
+To access the webUI of a service that's running on a remote machine, please use [Nginx Proxy Manager](https://nginxproxymanager.com/setup/)'s Stream feature. Simply install and open the Nginx proxy manager, add a stream with the port you want to forward *from* in the `Incoming Port` field, and the local ip and port of the machine you wish to connect to in the `Forward Host` and `Forward Port` boxes respectively. Also, go to the `docker-compose.yml` file and add the ports to that file as explained [here](https://github.com/NginxProxyManager/nginx-proxy-manager/issues/1506#issuecomment-948360527) (this step is very important as it won't forward without this), then restart the container!
+
+## Link to webUI of docker containers
+To have a docker container name act as a hyperlink for the container's webUI, simply go to `docker_ports.json` and add the number for the port in the quotes, next to the name of the container you want to link to.
+
+## Adding logos to systemd services and docker containers
+Simply add the image file to the `service_icons` directory.
+
 ## How to change the data background color
 You can either change the background color of the data boxes using the color picker in settings, or by editing the hex value in the `config.ini` file
 
@@ -71,4 +79,5 @@ You can add a custom CSS file by placing it in the `static` folder, then adding 
 You can add custom JavaScript by placing as many `.js` files into `static/custom_js`. Files will be loaded in alphabetical order, below all other JS on the page, just above the closing script tag. This can be used for many things, such as creating buttons that trigger alert or confirmation boxes, which then can be used to trigger other events.
 
 ## Possible features
+- Remotely view the status of remote Docker containers the same way you can with systemd services
 - More icons for popular services

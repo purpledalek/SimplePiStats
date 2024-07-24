@@ -44,6 +44,11 @@ if not os.path.exists(r"./config.ini"):
 if not os.path.exists("static/custom_js"):
     os.makedirs("static/custom_js", exist_ok=True)
 
+if not os.path.exists("docker_ports.json"):
+    with open("docker_ports.json", "w") as file:
+        file.write("{}")
+    
+
 # Set up listen address and port numbers
 listen_address = conf_get("address")
 port = conf_get("port")
@@ -57,17 +62,28 @@ def pre_append(command, lis):
     return lis
 
 def check_docker():
-    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{ .Names }}", "Status":"{{ .Status }}"}'], stdout=subprocess.PIPE, text=True).stdout.strip()
+    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{ .Names }}", "Status":"{{ .Status }}", "Ports":"{{ .Ports }}"}'], stdout=subprocess.PIPE, text=True).stdout.strip().split("\n")
     output = ""
     if docker_ps == "":
         output = "<div class='innerContainer'><div class='text'>No Docker containers found. Are you sure any are running? If you don't want to see this section you can hide it using settings</div><div>"
     else:
-        for i in docker_ps.split("\n"):
+        changes = False
+        with open("docker_ports.json", "r") as file:
+            docker_ports = json.loads(file.read())
+        for i in docker_ps:
             container_data = json.loads(i)
             name = container_data.get("Names")
+            if name not in docker_ports.keys():
+                changes = True
+                docker_ports[name] = ""
             output += f"<div id='{name}' class='innerContainer'><div class='text'>"
-            output += name
+            docker_port = docker_ports.get(name)
+            if docker_port != "":
+                output += f"<a class=\"container_stats\" id={docker_port} target=\"_blank\">{name}</a>"
+            else:
+                output += f"<p class=\"container_stats\" id={name} target=\"_blank\">{name}</p>"
             status = container_data.get("Status").replace("Up", "Container last restarted") + " ago"
+            output += add_image(name, True, status)
             if status.startswith("Exited"):
                 status_icon = "<p id=\"status\"> 🔴 </p>"
                 status = "Container last restarted N/A"
@@ -77,7 +93,24 @@ def check_docker():
             output += f"<p id='containerReboot'>{status}</p>"
             output += f"<div class='buttons'><button onclick='handle_button_action(\"stop/{name}\", \"docker\")'>Stop</button><button onclick='handle_button_action(\"restart/{name}\", \"docker\")'>Restart</button></div>"
             output += "</div>"
+        if changes == True:
+            with open("docker_ports.json", "w") as file:
+                file.write(json.dumps(docker_ports, indent=len(docker_ports)))
     return output
+
+def add_image(application:str, is_docker: bool, status_check):
+    for file in os.listdir("service_icons"):
+        if application.lower() == file.split(".")[0].lower():
+            if is_docker == False:
+                if status_check == "active":
+                    return f"<img class=\"service_icon\" src=\"service_icons/{file}\">"
+                else:
+                    return f"<img class=\"service_icon bw\" src=\"service_icons/{file}\">"
+            else:
+                if status_check.startswith("Container last restarted"):
+                    return f"<img class=\"service_icon\" src=\"service_icons/{file}\">"
+                else:
+                    return f"<img class=\"service_icon bw\" src=\"service_icons/{file}\">"
 
 def service_check(service_):
     output = ""
@@ -114,12 +147,9 @@ def service_check(service_):
             output += "<img class=\"service_icon\" src=\"static/favicon.png\">"
         else:
             output += "<img class=\"service_icon bw\" src=\"static/favicon.png\">"
-    for file in os.listdir(r"service_icons"):
-        if service.lower() == file.split(".")[0].lower():
-            if status_check == "active":
-                output += f"<img class=\"service_icon\" src=\"service_icons/{file}\">"
-            else:
-                output += f"<img class=\"service_icon bw\" src=\"service_icons/{file}\">"
+    else:
+        output += add_image(service, False, status_check)
+
     output += output_template.replace("desc", desc).replace("port", port).replace("remote", remote)
     if status_check == "active":
         service_boot_time = subprocess.run(pre_append(systemctl, ["show", "--property=ActiveEnterTimestamp", service]), stdout=subprocess.PIPE, text=True).stdout.strip().removeprefix("ActiveEnterTimestamp=")

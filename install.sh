@@ -10,6 +10,14 @@ if [ -s SimplePiStats/.checkbox_states.json ]; then
   sudo mv SimplePiStats/.checkbox_states.json /
 fi
 
+if [ -s SimplePiStats/docker_ports.json ]; then
+  sudo mv SimplePiStats/docker_ports.json /
+fi
+
+if [ -d SimplePiStats/static/custom_css ]; then
+  sudo mv SimplePiStats/static/custom_css /
+fi
+
 if [ -d SimplePiStats/static/custom_js ]; then
   sudo mv SimplePiStats/static/custom_js /
 fi
@@ -57,6 +65,16 @@ sudo cp SimplePiStats.service /lib/systemd/system/SimplePiStats.service
 if [ -d /custom_js ]; then
   sudo mv /custom_js/* ./static/custom_js/
   sudo rmdir /custom_js
+fi
+
+if [ -d /docker_ports.json ]; then
+  sudo mv /docker_ports.json/* ./docker_ports.json/
+  sudo rmdir /docker_ports.json
+fi
+
+if [ -d /custom_css ]; then
+  sudo mv /custom_css/* ./static/custom_css/
+  sudo rmdir /custom_css
 fi
 
 if [ -d /service_icons ]; then

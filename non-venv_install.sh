@@ -14,6 +14,14 @@ if [ -d SimplePiStats/static/custom_js ]; then
   sudo mv SimplePiStats/static/custom_js /
 fi
 
+if [ -s SimplePiStats/.checkbox_states.json ]; then
+  sudo mv SimplePiStats/.checkbox_states.json /
+fi
+
+if [ -s SimplePiStats/docker_ports.json ]; then
+  sudo mv SimplePiStats/docker_ports.json /
+fi
+
 # Remove previous installation
 if [ -d SimplePiStats ]; then
   rm -rf SimplePiStats
@@ -55,6 +63,16 @@ fi
 if [ -d /custom_js ]; then
   sudo mv /custom_js/* ./static/custom_js/
   sudo rmdir /custom_js
+fi
+
+if [ -f /.checkbox_states.json ]; then
+  rm -rf .checkbox_states.json
+  sudo mv /.checkbox_states.json .
+fi
+
+if [ -d /docker_ports.json ]; then
+  sudo mv /docker_ports.json/* ./docker_ports.json/
+  sudo rmdir /docker_ports.json
 fi
 
 if [ -f /config.ini ]; then
