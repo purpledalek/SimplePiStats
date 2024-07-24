@@ -62,7 +62,7 @@ def pre_append(command, lis):
     return lis
 
 def check_docker():
-    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{.Names}}", "Status":"{{.Status}}", "Ports":"{{.Ports}}"}'], stdout=subprocess.PIPE, text=True).stdout.strip().split("\n")
+    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{.Names}}","Status":"{{.Status}}","Ports":"{{.Ports}}"}'], stdout=subprocess.PIPE, text=True).stdout.strip().split("\n")
     output = ""
     if docker_ps == "":
         output = "<div class='innerContainer'><div class='text'>No Docker containers found. Are you sure any are running? If you don't want to see this section you can hide it using settings</div><div>"
@@ -402,7 +402,7 @@ def docker_button_action():
     button_action_ = str(request.json['button_id']).split("/")
     name = button_action_[1]
     subprocess.run(["sudo", "docker", button_action_[0], name], stdout=subprocess.DEVNULL)
-    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{.Names}}", "Status":"{{.Status}}"}'], stdout=subprocess.PIPE, text=True).stdout.strip()
+    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{.Names}}","Status":"{{.Status}}"}'], stdout=subprocess.PIPE, text=True).stdout.strip()
     for i in docker_ps.split("\n"):
         container_data = json.loads(i)
         if name == container_data.get("Names"):
