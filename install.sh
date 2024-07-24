@@ -66,9 +66,8 @@ if [ -d /custom_js ]; then
   sudo mv /custom_js/ ./static/
 fi
 
-if [ -d /docker_ports.json ]; then
-  sudo mv /docker_ports.json/* ./docker_ports.json/
-  sudo rmdir /docker_ports.json
+if [ -f /docker_ports.json ]; then
+  sudo mv /docker_ports.json .
 fi
 
 if [ -d /custom_css ]; then

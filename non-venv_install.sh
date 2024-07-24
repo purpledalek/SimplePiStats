@@ -69,9 +69,8 @@ if [ -f /.checkbox_states.json ]; then
   sudo mv /.checkbox_states.json .
 fi
 
-if [ -d /docker_ports.json ]; then
-  sudo mv /docker_ports.json/* ./docker_ports.json/
-  sudo rmdir /docker_ports.json
+if [ -f /docker_ports.json ]; then
+  sudo mv /docker_ports.json .
 fi
 
 if [ -f /config.ini ]; then
