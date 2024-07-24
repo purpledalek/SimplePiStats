@@ -64,7 +64,6 @@ sudo cp SimplePiStats.service /lib/systemd/system/SimplePiStats.service
 
 if [ -d /custom_js ]; then
   sudo mv /custom_js/ ./static/
-  sudo rmdir /custom_js
 fi
 
 if [ -d /docker_ports.json ]; then
