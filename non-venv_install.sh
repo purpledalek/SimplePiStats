@@ -61,8 +61,7 @@ if [ -d /service_icons ]; then
 fi
 
 if [ -d /custom_js ]; then
-  sudo mv /custom_js/* ./static/custom_js/
-  sudo rmdir /custom_js
+  sudo mv /custom_js/ ./static/
 fi
 
 if [ -f /.checkbox_states.json ]; then
