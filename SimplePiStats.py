@@ -41,8 +41,8 @@ if not os.path.exists(r"./config.ini"):
     with open("config.ini", "w") as config_file:
         config.write(config_file)
 
-if not os.path.exists("static/custom_js"):
-    os.makedirs("static/custom_js", exist_ok=True)
+if not os.path.exists("custom_js"):
+    os.makedirs("custom_js", exist_ok=True)
 
 if not os.path.exists("docker_ports.json"):
     with open("docker_ports.json", "w") as file:
@@ -315,8 +315,8 @@ def index():
                     pass
     output = ""
     custom_js = []
-    for filename in os.listdir("static/custom_js"):
-        with open(f"static/custom_js/{filename}") as file:
+    for filename in os.listdir("custom_js"):
+        with open(f"custom_js/{filename}") as file:
             custom_js.append(file.read())
     return render_template("SimplePiStats.html", hostname=hostname, cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), time_checkbox_state=file_contents.get(checkboxes[0]), speed_checkbox_state=file_contents.get(checkboxes[1]), numbers_checkbox_state=file_contents.get(checkboxes[2]), disk_checkbox_state=file_contents.get(checkboxes[3]), services_checkbox_state=file_contents.get(checkboxes[4]), commands_checkbox_state=file_contents.get(checkboxes[5]), fahrenheit_checkbox_state=file_contents.get(checkboxes[6]), font_checkbox_state=file_contents.get(checkboxes[7]), mystery_checkbox_state=file_contents.get(checkboxes[8]), command_buttons=" ".join(command_buttons), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"), addressConfig=listen_address, custom_css=conf_get("custom_css"), docker_containers=docker_containers, custom_js="\n\n".join(custom_js))
 
