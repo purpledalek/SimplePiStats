@@ -402,8 +402,8 @@ def edit_config():
             new_data[key] = value
     print(new_data)
     if type_ == "ini":
-        with open(file_path, "w") as mew_data:
-            config.write(new_data)
+        with open(file_path, "w") as file:
+            config.write(file)
     if type_ == "json":
         with open(file_path, "w") as file:
             json_d = json.dumps(new_data, indent=len(new_data))
