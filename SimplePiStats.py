@@ -23,7 +23,7 @@ config.read("config.ini")
 def conf_get(option: str):
     return ast.literal_eval(config.get("SimplePiStats", option))
 
-# get images for service icons
+# get images for service icons; add line denoting the ip of remote docker container
 @app.route('/service_icons/<path:filename>')
 def get_image(filename):
     return send_from_directory("service_icons", filename)
@@ -47,6 +47,10 @@ if not os.path.exists("static/custom_js"):
 if not os.path.exists("docker_ports.json"):
     with open("docker_ports.json", "w") as file:
         file.write("{}")
+
+if not os.path.exists("remote_ips.txt"):
+    with open("remote_ips.txt", "w"):
+        pass
     
 
 # Set up listen address and port numbers
@@ -61,10 +65,15 @@ def pre_append(command, lis):
         lis.insert(0, command)
     return lis
 
-def check_docker():
-    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{.Names}}","Status":"{{.Status}}","Ports":"{{.Ports}}"}'], stdout=subprocess.PIPE, text=True).stdout.strip().split("\n")
+
+# todo: add config box for docker ports?; move custom_js out of static into root
+def check_docker(remote: bool = False, ip: str = None):
     output = ""
-    if docker_ps == "":
+    if remote == True:
+        docker_ps = subprocess.run(pre_append(("ssh", ip), ["sudo", "docker", "ps", "--format", "json"]), stdout=subprocess.PIPE, text=True).stdout.strip().split("\n")
+    else:
+        docker_ps = subprocess.run(["sudo", "docker", "ps", "--format", '{"Names":"{{.Names}}","Status":"{{.Status}}","Ports":"{{.Ports}}"}'], stdout=subprocess.PIPE, text=True).stdout.strip().split("\n")
+    if docker_ps == []:
         output = "<div class='innerContainer'><div class='text'>No Docker containers found. Are you sure any are running? If you don't want to see this section you can hide it using settings</div><div>"
     else:
         changes = False
@@ -81,9 +90,13 @@ def check_docker():
             if docker_port != "":
                 output += f"<a class=\"container_stats\" id={docker_port} target=\"_blank\">{name}</a>"
             else:
-                output += f"<p class=\"container_stats\" id={name} target=\"_blank\">{name}</p>"
+                output += f"<p class=\"container_stats\" id={name}>{name}</p>"
+            if remote == True:
+                output += f"<p class='container_stats'> – on {ip}</p>"
+            output += "</a>" if remote == True else "</p>"
             status = container_data.get("Status").replace("Up", "Container last restarted") + " ago"
-            output += add_image(name, True, status)
+            image = add_image(name, True, status)
+            output += image if image != None else ""
             if status.startswith("Exited"):
                 status_icon = "<p id=\"status\"> 🔴 </p>"
                 status = "Container last restarted N/A"
@@ -111,7 +124,6 @@ def add_image(application:str, is_docker: bool, status_check):
                     return f"<img class=\"service_icon\" src=\"service_icons/{file}\">"
                 else:
                     return f"<img class=\"service_icon bw\" src=\"service_icons/{file}\">"
-
 def service_check(service_):
     output = ""
     stop = True
@@ -148,7 +160,8 @@ def service_check(service_):
         else:
             output += "<img class=\"service_icon bw\" src=\"static/favicon.png\">"
     else:
-        output += add_image(service, False, status_check)
+        image = add_image(service, False, status_check)
+        output += image if image != None else ""
 
     output += output_template.replace("desc", desc).replace("port", port).replace("remote", remote)
     if status_check == "active":
@@ -292,11 +305,27 @@ def index():
         temp = "3"
     command_buttons = create_command_buttons()
     docker_containers = check_docker()
+    with open("remote_ips.txt", "r") as file:
+        file_content = file.readlines()
+        if file_content != []:
+            for line in file_content:
+                docker_containers += check_docker(True, line)
+    output = ""
     custom_js = []
     for filename in os.listdir("static/custom_js"):
         with open(f"static/custom_js/{filename}") as file:
             custom_js.append(file.read())
     return render_template("SimplePiStats.html", hostname=hostname, cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), time_checkbox_state=file_contents.get(checkboxes[0]), speed_checkbox_state=file_contents.get(checkboxes[1]), numbers_checkbox_state=file_contents.get(checkboxes[2]), disk_checkbox_state=file_contents.get(checkboxes[3]), services_checkbox_state=file_contents.get(checkboxes[4]), commands_checkbox_state=file_contents.get(checkboxes[5]), fahrenheit_checkbox_state=file_contents.get(checkboxes[6]), font_checkbox_state=file_contents.get(checkboxes[7]), mystery_checkbox_state=file_contents.get(checkboxes[8]), command_buttons=" ".join(command_buttons), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"), addressConfig=listen_address, custom_css=conf_get("custom_css"), docker_containers=docker_containers, custom_js="\n\n".join(custom_js))
+
+@app.route('/get_docker_config', methods=['POST'])
+def get_docker_config():
+    with open("docker_ports.json", "r") as file:
+        json_content = file.read()
+    docker_ports_config = []
+    as_json = json.loads(json_content)
+    for i in as_json.items():
+        docker_ports_config.append({"name":i[0], "port":i[1]})
+    return jsonify({"docker_config": docker_ports_config})
 
 @app.route('/disk_usage', methods=['POST'])
 def disk_usage():
@@ -353,19 +382,25 @@ def save_color():
 
 @app.route('/edit_config', methods=['POST'])
 def edit_config():
-    config_data = request.json['config_data']
-    changed = False
+    config_data = request.json['config_data'][:-1]
+    print(config_data)
+    file_path = request.json['file_path']
+    new_data = {}
     for key, value in config_data:
         key = key.replace("Config", "")
         if key == "bg_color" or key == "address" or key == "custom_css":
             value = '"' + value + '"'
-        if value != config.get("SimplePiStats", key):
-            changed = True
-            config.set("SimplePiStats", key, value)
-    if changed == True:
-        with open(r"config.ini", "w") as config_file:
-            config.write(config_file)
-        changed = False
+        if file_path.endswith(".ini"):
+            if value != config.get("SimplePiStats", key):
+                config.set("SimplePiStats", key, value)
+                with open(file_path, "w") as config_file:
+                    config.write(config_file)
+        elif file_path.endswith(".json"):
+            new_data[key] = value
+            with open("docker_ports.json", "w") as file:
+                json_d = json.dumps(new_data, indent=len(new_data))
+                file.write(json_d)
+
     return '', 204
 
 @app.route('/systemd_button_action', methods=['POST'])
@@ -402,7 +437,7 @@ def docker_button_action():
     button_action_ = str(request.json['button_id']).split("/")
     name = button_action_[1]
     subprocess.run(["sudo", "docker", button_action_[0], name], stdout=subprocess.DEVNULL)
-    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", '{"Names":"{{.Names}}","Status":"{{.Status}}"}'], stdout=subprocess.PIPE, text=True).stdout.strip()
+    docker_ps = subprocess.run(["sudo", "docker", "ps", "-a", "--format", "{'Names':'{{.Names}}','Status':'{{.Status}}'}"], stdout=subprocess.PIPE, text=True).stdout.strip()
     for i in docker_ps.split("\n"):
         container_data = json.loads(i)
         if name == container_data.get("Names"):

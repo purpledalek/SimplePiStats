@@ -10,8 +10,8 @@ if [ -d SimplePiStats/service_icons ]; then
   sudo mv SimplePiStats/service_icons /
 fi
 
-if [ -d SimplePiStats/static/custom_js ]; then
-  sudo mv SimplePiStats/static/custom_js /
+if [ -d SimplePiStats/custom_js ]; then
+  sudo mv SimplePiStats/custom_js /
 fi
 
 if [ -s SimplePiStats/.checkbox_states.json ]; then
@@ -61,7 +61,7 @@ if [ -d /service_icons ]; then
 fi
 
 if [ -d /custom_js ]; then
-  sudo mv /custom_js/ ./static/
+  sudo mv /custom_js/ .
 fi
 
 if [ -f /.checkbox_states.json ]; then

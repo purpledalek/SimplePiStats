@@ -62,7 +62,7 @@ Note: this feature requires setting up a public/private key pair to be establish
 To access the webUI of a service that's running on a remote machine, please use [Nginx Proxy Manager](https://nginxproxymanager.com/setup/)'s Stream feature. Simply install and open the Nginx proxy manager, add a stream with the port you want to forward *from* in the `Incoming Port` field, and the local ip and port of the machine you wish to connect to in the `Forward Host` and `Forward Port` boxes respectively. Also, go to the `docker-compose.yml` file and add the ports to that file as explained [here](https://github.com/NginxProxyManager/nginx-proxy-manager/issues/1506#issuecomment-948360527) (this step is very important as it won't forward without this), then restart the container!
 
 ## Link to webUI of docker containers
-To have a docker container name act as a hyperlink for the container's webUI, simply go to `docker_ports.json` and add the number for the port in the quotes, next to the name of the container you want to link to.
+To have a docker container name act as a hyperlink for the container's webUI, simply edit `docker_ports.json` or click on `Show config` then `Edit docker ports`, and add the number for the port in the quotes, next to the name of the container you want to link to. If this is a remote device, you'll have to make sure you have an Nginx stream set up, as explained above
 
 ## Adding logos to systemd services and docker containers
 Simply add the image file to the `service_icons` directory.
@@ -76,7 +76,7 @@ Please note: images may be unstable on iPhone, refreshing is the only known fix 
 You can add a custom CSS file by placing it in the `static` folder, then adding the filename to the config. For example if you have a CSS file called myCustomStyle.css, you can put that in the `static` folder and then add "myCustomStyle.css" to the custom_css line of the config. Any changes made to elements in your custom css file will overwrite the default style for that element.
 
 ## Adding custom JavaScript
-You can add custom JavaScript by placing as many `.js` files into `static/custom_js`. Files will be loaded in alphabetical order, below all other JS on the page, just above the closing script tag. This can be used for many things, such as creating buttons that trigger alert or confirmation boxes, which then can be used to trigger other events.
+You can add custom JavaScript by placing as many `.js` files into `custom_js`. Files will be loaded in alphabetical order, below all other JS on the page, just above the closing script tag. This can be used for many things, such as creating buttons that trigger alert or confirmation boxes, which then can be used to trigger other events.
 
 ## Possible features
 - Remotely view the status of remote Docker containers the same way you can with systemd services

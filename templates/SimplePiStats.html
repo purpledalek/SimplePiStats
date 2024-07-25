@@ -9,8 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename=custom_css) }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
     <script>
-        function change_link() {
-            link = document.getElementsByClassName("service_stats")
+        function change_link(link) {
             for (element of link) {
                 if (element.nodeName === "A") {
                     port = ":" + element.id
@@ -20,7 +19,7 @@
         }
     </script>
 </head>
-<body onload="change_link()">
+<body onload="change_link(document.getElementsByClassName('service_stats')); change_link(document.getElementsByClassName('container_stats'))">
     <h2 class="titleElement">SimplePiStats</h2>
     <h2 class="titleElement" style="font-weight: lighter; float: right;"> {{ hostname }}</h2>
     <div id="buttonContainer">
@@ -118,7 +117,7 @@
     <div id="settings" class="dimBackground">
         <div class="settings_panel">
             <div style="width: 100%">
-                <form action="/update_settings" method="POST" onsubmit="hideSettings()">
+                <form action="/update_settings" method="POST" onsubmit="hideBox('settings')">
                     <div class="setting-block">
                         <input type="checkbox" id="serverTimeToggle" class="toggle_switch" style="display: inline-block" name="serverTimeToggle" {{ time_checkbox_state }}>
                         <label for="serverTimeToggle" class="toggle_switch" style="padding-right: 10px">Hide server time</label>
@@ -164,7 +163,7 @@
                         <input type="color" id="divBgColor" value="{{ div_color }}">
                     </div>
                     <div class="setting-block">
-                        <button onclick="ShowEditConfigBox()">Edit config...</button>
+                        <button onclick="ShowBox('edit_config', 'block', 'settings')">Show config</button>
                     </div>
                     <button type="submit" id="close_button" style="margin-right: 0;">Close</button>
                 </form>
@@ -173,7 +172,7 @@
     </div>
     <div id="edit_config" class="dimBackground">
         <div class="settings_panel">
-            <form onsubmit="updateConfig(this)">
+            <form onsubmit="updateConfig(this, 'config.ini')">
                 <div>
                     <label for="addressConfig">Listen address</label>
                     <input id="addressConfig" value="{{ addressConfig }}" autocomplete="off">
@@ -202,18 +201,62 @@
                     <label for="custom_css">Custom CSS file name (Checks the static folder)</label>
                     <input id="custom_css" value="{{ custom_css }}" autocomplete="off">
                 </div>
-                <button type="submit">Save and reload</button>
-                <button type="submit" onclick="hideConfigEdit()" style="float: right;">Close and don't save</button>
+                <button type="button" onclick="ShowBox('dockerPortsJson', 'block', 'edit_config')">Edit docker ports</button>
+                <div class="buttons">
+                    <button type="submit">Save and reload</button>
+                    <button type="submit" onclick="hideBox('edit_config')" style="float: right;">Close and don't save</button>
+                </div>
             </form>
             <p>Changing these values may require a restart of SimplePiStats to take effect</p>
         </div>
     </div>
+    <div class="settings_panel" id="dockerPortsJson">
+        <form onsubmit="updateConfig(this, 'docker_ports.json')" id>
+            <div class="buttons">
+                <button type="submit">Save</button>
+                <button type="button" onclick="hideBox('dockerPortsJson')">Cancel</button>
+            </div>
+        </form>
+    </div>
 
 <script>
-    function hideConfigEdit() {
+    function ShowBox(box, type, hide = null) {
         event.preventDefault()
-        document.getElementById('edit_config').style.display = 'none'
+        document.getElementById(box).style.display = type
+        if (hide != null) {
+            document.getElementById(hide).style.display = "none"
+        }
     }
+    function hideBox(box) {
+        event.preventDefault()
+        document.getElementById(box).style.display = 'none'
+    }
+
+    fetch('/get_docker_config', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        docker_ports_config = document.getElementById("dockerPortsJson").children[0]
+        for (i of data.docker_config) {
+            div = document.createElement("div")
+            div.classList.add("setting_data")
+            name_ = document.createElement("p")
+            name_.innerText = i.name
+            name_.style = "display: inline; margin-right: 20px"
+            port_ = document.createElement("input")
+            port_.id = i.name
+            port_.value = i.port
+            buttons = docker_ports_config.querySelector('.buttons')
+            div.appendChild(name_)
+            div.appendChild(port_)
+            docker_ports_config.insertBefore(div, buttons)
+        }
+    });
+    
     function update_systemd_service(data) {
         serviceName = document.getElementById(data.service)
         serviceName.querySelector('#status').innerText = data.status;
@@ -583,38 +626,29 @@
         document.getElementById('settings').style.display = "inline"
     }
 
-    function ShowEditConfigBox() {
+    function updateConfig(form, file) {
         event.preventDefault()
-        document.getElementById('settings').style.display = "none"
-        document.getElementById("edit_config").style.display = "block"
-    }
-
-    function updateConfig(form) {
-        event.preventDefault()
+        configData = []
+        i = 0
+        for (child of form.children) {
+            if (child.nodeName === "DIV" && child.classList != "buttons") {
+                configData.push([form.children[i].children[1].id, form.children[i].children[1].value])
+                i++
+            }
+        }
         fetch('/edit_config', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                config_data: [
-                    [form.children[0].children[1].id, form.children[0].children[1].value],
-                    [form.children[1].children[1].id, form.children[1].children[1].value],
-                    [form.children[2].children[1].id, form.children[2].children[1].value],
-                    [form.children[3].children[1].id, form.children[3].children[1].value],
-                    [form.children[4].children[1].id, form.children[4].children[1].value],
-                    [form.children[5].children[1].id, form.children[5].children[1].value],
-                    [form.children[6].children[1].id, form.children[6].children[1].value]
-                ]
+                config_data: configData,
+                file_path: file
             }),
         })
         .then(response => {
                 window.location.reload();
             })
-    }
-
-    function hideSettings() {
-        document.getElementById('settings').style.display = "none"
     }
 
     function Fahrenheit() {

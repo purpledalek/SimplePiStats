@@ -18,8 +18,8 @@ if [ -d SimplePiStats/static/custom_css ]; then
   sudo mv SimplePiStats/static/custom_css /
 fi
 
-if [ -d SimplePiStats/static/custom_js ]; then
-  sudo mv SimplePiStats/static/custom_js /
+if [ -d SimplePiStats/custom_js ]; then
+  sudo mv SimplePiStats/custom_js /
 fi
 
 if [ -d SimplePiStats/service_icons ]; then
@@ -63,7 +63,7 @@ fi
 sudo cp SimplePiStats.service /lib/systemd/system/SimplePiStats.service
 
 if [ -d /custom_js ]; then
-  sudo mv /custom_js/ ./static/
+  sudo mv /custom_js/ .
 fi
 
 if [ -f /docker_ports.json ]; then

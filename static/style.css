@@ -159,6 +159,10 @@ a {
     display: none;
 }
 
+#dockerPortsJson {
+    display: none;
+}
+
 #extDisks {
     min-width: 250px;
     text-align: center;
