@@ -66,7 +66,7 @@ def pre_append(command, lis):
     return lis
 
 
-# todo: add config box for docker ports?; move custom_js out of static into root
+# todo: fix remote docker error
 def check_docker(remote: bool = False, ip: str = None):
     output = ""
     if remote == True:
@@ -309,7 +309,10 @@ def index():
         file_content = file.readlines()
         if file_content != []:
             for line in file_content:
-                docker_containers += check_docker(True, line)
+                try:
+                    docker_containers += check_docker(True, line.replace("\n", ""))
+                except:
+                    pass
     output = ""
     custom_js = []
     for filename in os.listdir("static/custom_js"):
@@ -382,8 +385,7 @@ def save_color():
 
 @app.route('/edit_config', methods=['POST'])
 def edit_config():
-    config_data = request.json['config_data'][:-1]
-    print(config_data)
+    config_data = request.json['config_data']
     file_path = request.json['file_path']
     new_data = {}
     for key, value in config_data:
@@ -391,16 +393,21 @@ def edit_config():
         if key == "bg_color" or key == "address" or key == "custom_css":
             value = '"' + value + '"'
         if file_path.endswith(".ini"):
+            type_ = "ini"
             if value != config.get("SimplePiStats", key):
                 config.set("SimplePiStats", key, value)
-                with open(file_path, "w") as config_file:
-                    config.write(config_file)
         elif file_path.endswith(".json"):
+            type_ = "json"
+            print(key, value)
             new_data[key] = value
-            with open("docker_ports.json", "w") as file:
-                json_d = json.dumps(new_data, indent=len(new_data))
-                file.write(json_d)
-
+    print(new_data)
+    if type_ == "ini":
+        with open(file_path, "w") as mew_data:
+            config.write(new_data)
+    if type_ == "json":
+        with open(file_path, "w") as file:
+            json_d = json.dumps(new_data, indent=len(new_data))
+            file.write(json_d)
     return '', 204
 
 @app.route('/systemd_button_action', methods=['POST'])
