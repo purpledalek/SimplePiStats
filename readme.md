@@ -79,5 +79,4 @@ You can add a custom CSS file by placing it in the `static` folder, then adding 
 You can add custom JavaScript by placing as many `.js` files into `custom_js`. Files will be loaded in alphabetical order, below all other JS on the page, just above the closing script tag. This can be used for many things, such as creating buttons that trigger alert or confirmation boxes, which then can be used to trigger other events.
 
 ## Possible features
-- Remotely view the status of remote Docker containers the same way you can with systemd services
 - More icons for popular services
