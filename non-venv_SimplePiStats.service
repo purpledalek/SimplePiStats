@@ -3,7 +3,7 @@ Description=SimplePiStats
 After=network.target
 
 [Service]
-ExecStart=python SimplePiStats.py
+ExecStart=/usr/bin/python3 SimplePiStats.py
 WorkingDirectory=/path/to/file
 StandardOutput=inherit
 StandardError=inherit
