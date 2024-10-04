@@ -84,7 +84,7 @@ rm -rf .git
 # Enable the service
 sudo systemctl enable SimplePiStats
 shaFromGH=$( git ls-remote https://github.com/purpledalek/SimplePiStats.git main | cut -f 1)
-sed -i "1 s|lastSha=.*|lastSha=$shaFromGH|" non-venv-update.sh
+sed -i "1 s|lastSha=.*|lastSha=$shaFromGH|" non-venv_update.sh
 
 echo Install complete!
 
