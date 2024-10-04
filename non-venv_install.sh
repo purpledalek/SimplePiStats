@@ -35,7 +35,7 @@ cd SimplePiStats || return
 
 # Install dependencies
 echo Installing dependencies...
-python -m pip install -r requirements.txt --break-system-packages  > /dev/null 2>&1
+pip install -r requirements.txt --break-system-packages  > /dev/null 2>&1
 
 # Update service file with correct paths
 echo Setting up file structure...
