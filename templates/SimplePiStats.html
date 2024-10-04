@@ -30,32 +30,6 @@
         <p style="width: fit-content; display: inline-block;">Server time: </p>
         <div id="serverTimeDiv"></div>
     </div>
-    <div class="speedTest">
-        <div class="speedTestData">
-            <p class="speedTestTitle"><b>Download</b></p>
-            <p id="download" class="innerContainer">
-                Please wait
-            </p>
-        </div>
-        <div class="speedTestData">
-            <p class="speedTestTitle"><b>Upload</b></p>
-            <p id="upload" class="innerContainer">
-                Please wait
-            </p>
-        </div>
-        <div class="speedTestData">
-            <p class="speedTestTitle"><b>Ping</b></p>
-            <p id="ping" class="innerContainer">
-                Please wait
-            </p>
-        </div>
-        <div class="speedTestData">
-            <p class="speedTestTitle"><b>Server location</b></p>
-            <p id="ping" class="innerContainer">
-                Please wait
-            </p>
-        </div>
-    </div>
     <div class="centered_div">
         <div class="data" id="rebootClock">
             <h2 class="heading" style="white-space: initial">System last restarted</h2>
@@ -117,14 +91,10 @@
     <div id="settings" class="dimBackground">
         <div class="settings_panel">
             <div style="width: 100%">
-                <form action="/update_settings" method="POST" onsubmit="hideBox('settings')">
+                <form action="/update_settings" method="POST" onsubmit="hideBox('settings'); this.submit()">
                     <div class="setting-block">
                         <input type="checkbox" id="serverTimeToggle" class="toggle_switch" style="display: inline-block" name="serverTimeToggle" {{ time_checkbox_state }}>
                         <label for="serverTimeToggle" class="toggle_switch" style="padding-right: 10px">Hide server time</label>
-                    </div>
-                    <div class="setting-block">
-                        <input type="checkbox" id="speedToggle" class="toggle_switch" style="display: inline-block" name="speedTestToggle" {{ speed_checkbox_state }}>
-                        <label for="speedToggle" class="toggle_switch" style="padding-right: 10px">Hide speed test (Having this hidden will reduce internet usage, as it doesn't send the request to Ookla)</label>
                     </div>
                     <div class="setting-block">
                         <input type="checkbox" id="temp_toggle" class="toggle_switch" style="display: inline-block" name="numbersToggle" {{ numbers_checkbox_state }}>
@@ -387,7 +357,6 @@
 
     // Yes, these are out here for a reason, DON'T move them, you WILL break things!!
     const dataBackroundColor = document.getElementById("divBgColor");
-    const speed_test_element = document.getElementsByClassName("speedTest")[0]
 
     document.addEventListener("DOMContentLoaded", function() {
 
@@ -410,7 +379,6 @@
         const mystery_toggle = document.getElementById("mysteryToggle");
         const disk_toggle = document.getElementById("diskToggle");
         const server_time_toggle = document.getElementById("serverTimeToggle");
-        const speed_test_toggle = document.getElementById("speedToggle")
         const docker_toggle = document.getElementById("dockerToggle")
 
         function hideElement(toggle, element, dispType) {
@@ -429,7 +397,6 @@
         hideElement(disk_toggle, [disk_element], ["block"])
         hideElement(commands_toggle, [commands_element], ["block"])
         hideElement(server_time_toggle, [server_time_element], ["inline-block"])
-        hideElement(speed_test_toggle, [speed_test_element], ["inline"])
         hideElement(docker_toggle, [docker_containers_element], ["inline"])
         
         
@@ -475,29 +442,7 @@
         hideElementOnLoad(disk_toggle, [disk_element])
         hideElementOnLoad(commands_toggle, [commands_element])
         hideElementOnLoad(server_time_toggle, [server_time_element])
-        hideElementOnLoad(speed_test_toggle, [speed_test_element])
         hideElementOnLoad(docker_toggle, [docker_containers_element])
-
-        if (!speed_test_element.classList.contains("hidden")) {
-            fetch('/speed_test', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                speed_test_element.querySelector('#ping').innerText = data.ping;
-                speed_test_element.querySelector('#upload').innerText = data.upload;
-                speed_test_element.querySelector('#download').innerText = data.download;
-                speed_test_element.querySelector('#location').innerText = data.location
-            })
-        }
-        else {
-            for (child of speed_test_element.children) {
-                child.children[1].innerText = "Please reload"
-            }
-        }
 
         if (disk_element.style.display != "none") {
             fetch('/disk_usage', {

@@ -1,7 +1,7 @@
 # SimplePiStats
 A simple UI designed for people running their Raspberry Pi as a server, and who quick and easy to read stats and control of their system.
 
-## Please ensure you are using Raspbian Bookworm for the internet speed test to work
+## Please note: as of early October 2024, the built in speed test was removed. If you wish to re-enable this feature for your install, please see [This guide](https://github.com/purpledalek/SimplePiStats/blob/main/Speedtest_custom_command_setup.md)
 
 ## New features!
 - The ability to display Docker container information and control containers the same way as systemd services

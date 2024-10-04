@@ -190,26 +190,7 @@ def service_check(service_):
     output += "</div>"
     return output
 
-
-@app.route("/speed_test", methods=['POST'])
-def speed_test():
-    response = subprocess.Popen(['/usr/bin/speedtest'], shell=True, stdout=subprocess.PIPE).stdout.read().decode('utf-8')
-    ping = re.search(': (.*?ms)', response, re.MULTILINE)
-    download = re.search('Download:\s+(.*?s)', response, re.MULTILINE)
-    upload = re.search('Upload:\s+(.*?s)', response, re.MULTILINE)
-    location = re.search('Hosted by .*\[(.*)]', response, re.MULTILINE)
-    try:
-        ping = ping.group(1)
-    except:
-        ping = re.search('Latency:\s+(.*?s)', response, re.MULTILINE)
-        ping = ping.group(1)
-    download = download.group(1)
-    upload = upload.group(1)
-    location = location.group(1)
-
-    return jsonify({"ping": ping, "download": download, "upload": upload, "location": location})
-
-checkboxes = ["serverTimeToggle", "speedTestToggle", "numbersToggle", "diskToggle", "servicesToggle", "commandsToggle", "dockerToggle", "cfToggle", "fontToggle", "mysteryToggle"]
+checkboxes = ["serverTimeToggle", "numbersToggle", "diskToggle", "servicesToggle", "commandsToggle", "dockerToggle", "cfToggle", "fontToggle", "mysteryToggle"]
 
 if not os.path.exists(r".checkbox_states.json"):
     with open(r".checkbox_states.json", 'w') as file:
@@ -318,7 +299,7 @@ def index():
     for filename in os.listdir("custom_js"):
         with open(f"custom_js/{filename}") as file:
             custom_js.append(file.read())
-    return render_template("SimplePiStats.html", hostname=hostname, cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), time_checkbox_state=file_contents.get(checkboxes[0]), speed_checkbox_state=file_contents.get(checkboxes[1]), numbers_checkbox_state=file_contents.get(checkboxes[2]), disk_checkbox_state=file_contents.get(checkboxes[3]), services_checkbox_state=file_contents.get(checkboxes[4]), commands_checkbox_state=file_contents.get(checkboxes[5]), fahrenheit_checkbox_state=file_contents.get(checkboxes[6]), font_checkbox_state=file_contents.get(checkboxes[7]), mystery_checkbox_state=file_contents.get(checkboxes[8]), command_buttons=" ".join(command_buttons), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"), addressConfig=listen_address, custom_css=conf_get("custom_css"), docker_containers=docker_containers, custom_js="\n\n".join(custom_js))
+    return render_template("SimplePiStats.html", hostname=hostname, cpu_status=cpu_status, cpu_status_numbers=str(cpu) + "%", boot_time=boot_time, temp=temp, Celsius=str(Celsius) + "°C", Fahrenheit=str(Fahrenheit) + "°F", services=" ".join(services), time_checkbox_state=file_contents.get(checkboxes[0]), numbers_checkbox_state=file_contents.get(checkboxes[2]), disk_checkbox_state=file_contents.get(checkboxes[3]), services_checkbox_state=file_contents.get(checkboxes[4]), commands_checkbox_state=file_contents.get(checkboxes[5]), fahrenheit_checkbox_state=file_contents.get(checkboxes[6]), font_checkbox_state=file_contents.get(checkboxes[7]), mystery_checkbox_state=file_contents.get(checkboxes[8]), command_buttons=" ".join(command_buttons), server_time=server_time, div_color=conf_get("bg_color"), port=port, commandsConfig=conf_get("commands"), drivesConfig=conf_get("drives"), servicesConfig=conf_get("services"), addressConfig=listen_address, custom_css=conf_get("custom_css"), docker_containers=docker_containers, custom_js="\n\n".join(custom_js))
 
 @app.route('/get_docker_config', methods=['POST'])
 def get_docker_config():
