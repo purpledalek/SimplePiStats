@@ -36,8 +36,6 @@ cd SimplePiStats || return
 # Install dependencies
 echo Installing dependencies...
 python -m pip install -r requirements.txt --break-system-packages  > /dev/null 2>&1
-curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash > /dev/null 2>&1
-sudo apt-get install speedtest-cli > /dev/null 2>&1
 
 # Update service file with correct paths
 echo Setting up file structure...
