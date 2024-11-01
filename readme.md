@@ -65,7 +65,7 @@ To access the webUI of a service that's running on a remote machine, please use 
 To have a docker container name act as a hyperlink for the container's webUI, simply edit `docker_ports.json` or click on `Show config` then `Edit docker ports`, and add the number for the port in the quotes, next to the name of the container you want to link to. If this is a remote device, you'll have to make sure you have an Nginx stream set up, as explained above
 
 ## Adding logos to systemd services and docker containers
-Simply add the image file to the `service_icons` directory.
+Simply add the image file to the `service_icons` directory. A good resource for downloading icons for many applications can be found [here](https://github.com/walkxcode/dashboard-icons)
 
 ## How to change the data background color
 You can either change the background color of the data boxes using the color picker in settings, or by editing the hex value in the `config.ini` file
