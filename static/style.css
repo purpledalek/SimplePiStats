@@ -294,6 +294,7 @@ a {
     }
     .driveDiv {
         width: 87%;
+        padding: 50px;
     }
     .speedTestData {
         #download, #upload, #ping {
